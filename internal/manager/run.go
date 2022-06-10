@@ -27,10 +27,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
 	gatewayv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 
 	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
 	"github.com/kong/gateway-operator/controllers"
+	"github.com/kong/gateway-operator/internal/admission"
 	"github.com/kong/gateway-operator/pkg/vars"
 )
 
@@ -119,6 +121,19 @@ func Run(cfg Config) error {
 	}
 	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
 		return fmt.Errorf("unable to set up ready check: %w", err)
+	}
+
+	tlsCertPath := "/tmp/k8s-webhook-server/serving-certs/tls.crt"
+	tlsKeyPath := "/tmp/k8s-webhook-server/serving-certs/tls.key"
+	if _, certFileErr := os.Stat(tlsCertPath); certFileErr == nil {
+		if _, keyFileErr := os.Stat(tlsKeyPath); keyFileErr == nil {
+			hookServer := admission.NewWebhookServerFromManager(mgr)
+			setupLog.Info("start webhook at port" + fmt.Sprintf("%s:%d", hookServer.Host, hookServer.Port))
+		} else {
+			setupLog.Info("TLS key file does not exist, do not start webhook, path:" + tlsKeyPath)
+		}
+	} else {
+		setupLog.Info("TLS certificate file does not exist, do not start webhook, path:" + tlsCertPath)
 	}
 
 	setupLog.Info("starting manager")

@@ -67,3 +67,10 @@ const (
 	// all other attempts to dynamically decide the default image fail.
 	DefaultControlPlaneImage = DefaultControlPlaneBaseImage + ":" + DefaultControlPlaneTag
 )
+
+// -----------------------------------------------------------------------------
+// Consts - Environment Variable Names
+// -----------------------------------------------------------------------------
+const (
+	EnvVarKongDatabase = "KONG_DATABASE"
+)
