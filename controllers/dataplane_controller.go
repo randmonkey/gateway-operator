@@ -86,11 +86,12 @@ func (r *DataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil // no need to requeue, the update will trigger.
 	}
 	// validate dataplane
-	v := dataplanevalidation.NewValidator(r.Client)
-	err = v.Validate(dataplane)
+	err = dataplanevalidation.NewValidator(r.Client).Validate(dataplane)
 	if err != nil {
-		debug(log, "failed to validate dataplane: error "+err.Error(), dataplane)
+		debug(log, "failed to validate dataplane: "+err.Error(), dataplane)
 		r.eventRecorder.Event(dataplane, "Warning", "ValidationFailed", err.Error())
+		r.ensureDataPlaneIsMarkedNotProvisioned(ctx, dataplane,
+			DataPlaneConditionValidationFailed, err.Error())
 		return ctrl.Result{Requeue: false}, nil
 	}
 

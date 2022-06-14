@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
 	gatewayv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 
 	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
@@ -127,7 +126,7 @@ func Run(cfg Config) error {
 	tlsKeyPath := "/tmp/k8s-webhook-server/serving-certs/tls.key"
 	if _, certFileErr := os.Stat(tlsCertPath); certFileErr == nil {
 		if _, keyFileErr := os.Stat(tlsKeyPath); keyFileErr == nil {
-			hookServer := admission.NewWebhookServerFromManager(mgr)
+			hookServer := admission.NewWebhookServerFromManager(mgr, ctrl.Log)
 			setupLog.Info("start webhook at port" + fmt.Sprintf("%s:%d", hookServer.Host, hookServer.Port))
 		} else {
 			setupLog.Info("TLS key file does not exist, do not start webhook, path:" + tlsKeyPath)

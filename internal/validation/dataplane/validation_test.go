@@ -4,13 +4,13 @@ import (
 	"encoding/base64"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	operatorv1alpha1 "github.com/kong/gateway-operator/api/v1alpha1"
 	"github.com/kong/gateway-operator/internal/consts"
-	"github.com/stretchr/testify/require"
 )
 
 func TestValidateDeployOptions(t *testing.T) {
@@ -28,6 +28,22 @@ func TestValidateDeployOptions(t *testing.T) {
 			// so here we should usebase64 encoded value in Data.
 			Data: map[string][]byte{
 				"postgres": []byte(base64.StdEncoding.EncodeToString([]byte("postgres"))),
+			},
+		},
+		&corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: "test-cm-2"},
+			// fake client does not encode fields in StringData to Data,
+			// so here we should usebase64 encoded value in Data.
+			Data: map[string]string{
+				"KONG_DATABASE": "xxx",
+			},
+		},
+		&corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: "test-secret-2"},
+			// fake client does not encode fields in StringData to Data,
+			// so here we should usebase64 encoded value in Data.
+			Data: map[string][]byte{
+				"DATABASE": []byte(base64.StdEncoding.EncodeToString([]byte("xxx"))),
 			},
 		},
 	)
@@ -170,6 +186,52 @@ func TestValidateDeployOptions(t *testing.T) {
 			},
 			hasError: true,
 			errMsg:   "database backend postgres of dataplane not supported currently",
+		},
+		{
+			msg: "dataplane with dbmode=xxx (from configmap in envFrom) should be invalid",
+			dataplane: &operatorv1alpha1.DataPlane{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-db-off-in-cm",
+					Namespace: "default",
+				},
+				Spec: operatorv1alpha1.DataPlaneSpec{
+					DeploymentOptions: operatorv1alpha1.DeploymentOptions{
+						EnvFrom: []corev1.EnvFromSource{
+							{
+								Prefix: "",
+								ConfigMapRef: &corev1.ConfigMapEnvSource{
+									LocalObjectReference: corev1.LocalObjectReference{Name: "test-cm-2"},
+								},
+							},
+						},
+					},
+				},
+			},
+			hasError: true,
+			errMsg:   "database backend xxx of dataplane not supported currently",
+		},
+		{
+			msg: "dataplane with dbmode=xxx (from secret in envFrom) should be invalid",
+			dataplane: &operatorv1alpha1.DataPlane{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-db-off-in-secret",
+					Namespace: "default",
+				},
+				Spec: operatorv1alpha1.DataPlaneSpec{
+					DeploymentOptions: operatorv1alpha1.DeploymentOptions{
+						EnvFrom: []corev1.EnvFromSource{
+							{
+								Prefix: "KONG_",
+								SecretRef: &corev1.SecretEnvSource{
+									LocalObjectReference: corev1.LocalObjectReference{Name: "test-secret-2"},
+								},
+							},
+						},
+					},
+				},
+			},
+			hasError: true,
+			errMsg:   "database backend xxx of dataplane not supported currently",
 		},
 	}
 
