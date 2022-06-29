@@ -8,8 +8,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -46,6 +48,10 @@ var (
 	existingClusterName  = os.Getenv("KONG_TEST_CLUSTER")
 	controllerManagerOut = os.Getenv("KONG_CONTROLLER_OUT")
 	skipClusterCleanup   bool
+	runWebhookTests      = false
+	webhookCertDir       = ""
+	webhookServerIP      = os.Getenv("GATEWAY_OPERATOR_WEBHOOK_IP")
+	webhookServerPort    = 9443
 )
 
 // -----------------------------------------------------------------------------
@@ -128,8 +134,37 @@ func TestMain(m *testing.M) {
 	exitOnErr(clusters.KustomizeDeployForCluster(ctx, env.Cluster(), gatewayAPIsCRDs))
 	exitOnErr(waitForCRDs(ctx))
 
+	// prepare for running webhook if we are going to run webhook tests. includes:
+	// - creating self-signed TLS certificates for webhook server
+	// - creating validaing webhook in test environment
+	runWebhookTests = (os.Getenv("RUN_WEBHOOK_TESTS") == "true")
+	if runWebhookTests {
+		// get IP for genrating certificate and for clients to access.
+		if webhookServerIP == "" {
+			var getIPErr error
+			webhookServerIP, err = getFirstNonLoopbackIP()
+			exitOnErr(getIPErr)
+		}
+
+		// generate certificates for webhooks.
+		// must run before we start controller manager to start webhook server in controller.
+		exitOnErr(generateWebhookCertificates())
+
+		// create webhook resources in k8s.
+		fmt.Println("INFO: creating a validating webhook and waiting for it to start")
+		err = createValidatingWebhook(ctx, k8sClient,
+			fmt.Sprintf("https://%s:%d/validate", webhookServerIP, webhookServerPort),
+			webhookCertDir+"/ca.crt")
+		exitOnErr(err)
+	}
+
 	fmt.Println("INFO: starting the operator's controller manager")
-	go startControllerManager()
+	startControllerManager()
+
+	// wait for webhook server in controller to be ready after controller started.
+	if runWebhookTests {
+		exitOnErr(waitForWebhook(ctx, webhookServerIP, webhookServerPort))
+	}
 
 	fmt.Println("INFO: environment is ready, starting tests")
 	code := m.Run()
@@ -195,6 +230,10 @@ func startControllerManager() {
 	cfg.DevelopmentMode = true
 	cfg.ControllerName = "konghq.com/gateway-operator-integration-tests"
 
+	if runWebhookTests {
+		cfg.WebhookCertDir = webhookCertDir
+	}
+
 	cfg.NewClientFunc = func(cache cache.Cache, config *rest.Config, options client.Options, uncachedObjects ...client.Object) (client.Client, error) {
 		// always hijack and impersonate the system service account here so that the manager
 		// is testing the RBAC permissions we provide under config/rbac/. This helps alert us
@@ -213,7 +252,16 @@ func startControllerManager() {
 		})
 	}
 
-	exitOnErr(manager.Run(cfg))
+	if controllerManagerOut != "stdout" {
+		out, err := os.CreateTemp(os.TempDir(), "gateway-operator-controller-logs")
+		exitOnErr(err)
+		cfg.Out = out
+		fmt.Printf("INFO: controller output is being logged to %s\n", out.Name())
+		defer out.Close()
+	}
+	go func() {
+		exitOnErr(manager.Run(cfg))
+	}()
 }
 
 func waitForCRDs(ctx context.Context) error {
@@ -227,6 +275,40 @@ func waitForCRDs(ctx context.Context) error {
 			if err == nil {
 				ready = true
 			}
+		}
+	}
+	return nil
+}
+
+func generateWebhookCertificates() error {
+	// generate certificates for webhook.
+	fmt.Println("INFO: creating certificates for running webhook tests")
+	dir, err := os.MkdirTemp(os.TempDir(), "gateway-operator-webhook-certs")
+	if err != nil {
+		return err
+	}
+	webhookCertDir = dir
+
+	fmt.Println("INFO: creating certificates in directory", webhookCertDir)
+	cmd := exec.CommandContext(ctx, "../../hack/generate-certificates-openssl.sh", webhookCertDir, webhookServerIP)
+	return cmd.Run()
+}
+
+func waitForWebhook(ctx context.Context, ip string, port int) error {
+	ready := false
+	for !ready {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", ip, port))
+			if err == nil {
+				conn.Close()
+				ready = true
+			}
+		}
+		if !ready {
+			time.Sleep(time.Second)
 		}
 	}
 	return nil

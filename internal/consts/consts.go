@@ -73,7 +73,7 @@ const (
 // -----------------------------------------------------------------------------
 
 const (
-	// EnvVarKongDatabase is the enviroment variable name to specify database
+	// EnvVarKongDatabase is the environment variable name to specify database
 	// backend used for dataplane(KOng gateway). Currently only DBLess mode
 	// (empty, or "off") is supported.
 	EnvVarKongDatabase = "KONG_DATABASE"

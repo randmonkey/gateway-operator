@@ -1,19 +1,27 @@
-package dataplane
+package admission
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/require"
+	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	operatorv1alpha1 "github.com/kong/gateway-operator/api/v1alpha1"
 	"github.com/kong/gateway-operator/internal/consts"
 )
 
-func TestValidateDeployOptions(t *testing.T) {
+func TestHandleDataplaneValidation(t *testing.T) {
 	b := fakeclient.NewClientBuilder()
 	b.WithObjects(
 		&corev1.ConfigMap{
@@ -47,15 +55,19 @@ func TestValidateDeployOptions(t *testing.T) {
 			},
 		},
 	)
+	c := b.Build()
+
+	handler := NewRequestHandler(c, logr.Discard())
+	server := httptest.NewServer(handler)
 
 	testCases := []struct {
-		msg       string
+		name      string
 		dataplane *operatorv1alpha1.DataPlane
 		hasError  bool
 		errMsg    string
 	}{
 		{
-			msg: "dataplane with dbmode=off should be valid",
+			name: "validate_ok:dbmode=off",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-db-off",
@@ -77,7 +89,7 @@ func TestValidateDeployOptions(t *testing.T) {
 			hasError: false,
 		},
 		{
-			msg: "dataplane with empty dbmode should be valid",
+			name: "validate_ok:dbmode=empty",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-db-off",
@@ -99,7 +111,7 @@ func TestValidateDeployOptions(t *testing.T) {
 			hasError: false,
 		},
 		{
-			msg: "dataplane with dbmode=postgres should be invalid",
+			name: "validate_error:database=postgres",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-db-postgres",
@@ -122,10 +134,10 @@ func TestValidateDeployOptions(t *testing.T) {
 			errMsg:   "database backend postgres of dataplane not supported currently",
 		},
 		{
-			msg: "dataplane with arbitrary dbmode should be invalid",
+			name: "validate_error:database=xxx",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-db-postgres",
+					Name:      "test-db-xxx",
 					Namespace: "default",
 				},
 				Spec: operatorv1alpha1.DataPlaneSpec{
@@ -145,7 +157,7 @@ func TestValidateDeployOptions(t *testing.T) {
 			errMsg:   "database backend xxx of dataplane not supported currently",
 		},
 		{
-			msg: "dataplane with dbmode=off (from configmap) should be valid",
+			name: "validate_ok:db=off_in_configmap",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-db-off-in-cm",
@@ -172,7 +184,7 @@ func TestValidateDeployOptions(t *testing.T) {
 			hasError: false,
 		},
 		{
-			msg: "dataplane with dbmode=postgres (from secret) should be invalid",
+			name: "validate_error:db=postgres_in_secret",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-db-postgres-in-secret",
@@ -200,10 +212,10 @@ func TestValidateDeployOptions(t *testing.T) {
 			errMsg:   "database backend postgres of dataplane not supported currently",
 		},
 		{
-			msg: "dataplane with dbmode=xxx (from configmap in envFrom) should be invalid",
+			name: "validate_error:db=xxx_in_cm_envFrom",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-db-off-in-cm",
+					Name:      "test-db-xxx-in-cm",
 					Namespace: "default",
 				},
 				Spec: operatorv1alpha1.DataPlaneSpec{
@@ -225,7 +237,7 @@ func TestValidateDeployOptions(t *testing.T) {
 			errMsg:   "database backend xxx of dataplane not supported currently",
 		},
 		{
-			msg: "dataplane with dbmode=xxx (from secret in envFrom) should be invalid",
+			name: "validate_ok:db=off_in_secret_envfrom",
 			dataplane: &operatorv1alpha1.DataPlane{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-db-off-in-secret",
@@ -252,14 +264,49 @@ func TestValidateDeployOptions(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		v := &Validator{
-			c: b.Build(),
-		}
-		err := v.Validate(tc.dataplane)
-		if !tc.hasError {
-			require.NoErrorf(t, err, tc.msg)
-		} else {
-			require.ErrorContainsf(t, err, tc.errMsg, tc.msg)
-		}
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			review := &admissionv1.AdmissionReview{
+				Request: &admissionv1.AdmissionRequest{
+					UID: "",
+					Kind: metav1.GroupVersionKind{
+						Group:   operatorv1alpha1.GroupVersion.Group,
+						Version: operatorv1alpha1.GroupVersion.Version,
+						Kind:    "dataplanes",
+					},
+					Resource:  dataPlaneGVResource,
+					Name:      tc.dataplane.Name,
+					Namespace: tc.dataplane.Namespace,
+					Operation: admissionv1.Create,
+					Object: runtime.RawExtension{
+						Object: tc.dataplane,
+					},
+				},
+			}
+
+			buf, err := json.Marshal(review)
+			require.NoErrorf(t, err, "there should be error in marshaling into JSON")
+			req, err := http.NewRequest("POST", server.URL, bytes.NewReader(buf))
+			require.NoError(t, err, "there should be no error in making HTTP request")
+			resp, err := http.DefaultClient.Do(req)
+			require.NoError(t, err, "there should be no error in getting response")
+			body, err := ioutil.ReadAll(resp.Body)
+			require.NoError(t, err, "there should be no error in reading body")
+			resp.Body.Close()
+			respReview := &admissionv1.AdmissionReview{}
+			err = json.Unmarshal(body, respReview)
+			require.NoError(t, err, "there should be no error in unmarshalling body")
+			validationResp := respReview.Response
+
+			if !tc.hasError {
+				// code in http package is in type int, but int32 in Result.Code
+				// so EqualValues used instead of Equal
+				require.EqualValues(t, http.StatusOK, validationResp.Result.Code, "response code should be 200 OK")
+			} else {
+				require.EqualValues(t, http.StatusBadRequest, validationResp.Result.Code, "response code should be 400 Bad Request")
+				require.Contains(t, validationResp.Result.Message, tc.errMsg, "result message should contain expected content")
+			}
+		})
 	}
+
 }

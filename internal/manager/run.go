@@ -19,6 +19,7 @@ package manager
 import (
 	"fmt"
 	"os"
+	"path"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -27,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	gatewayv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 
 	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
@@ -40,6 +42,13 @@ var (
 	setupLog = ctrl.Log.WithName("setup")
 )
 
+const (
+	defaultWebhookCertDir = "/tmp/k8s-webhook-server/serving-certs"
+	caCertFilename        = "ca.crt"
+	tlsCertFilename       = "tls.crt"
+	tlsKeyFilename        = "tls.key"
+)
+
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(operatorv1alpha1.AddToScheme(scheme))
@@ -50,6 +59,7 @@ func init() {
 type Config struct {
 	MetricsAddr     string
 	ProbeAddr       string
+	WebhookCertDir  string
 	WebhookPort     int
 	LeaderElection  bool
 	DevelopmentMode bool
@@ -122,18 +132,7 @@ func Run(cfg Config) error {
 		return fmt.Errorf("unable to set up ready check: %w", err)
 	}
 
-	tlsCertPath := "/tmp/k8s-webhook-server/serving-certs/tls.crt"
-	tlsKeyPath := "/tmp/k8s-webhook-server/serving-certs/tls.key"
-	if _, certFileErr := os.Stat(tlsCertPath); certFileErr == nil {
-		if _, keyFileErr := os.Stat(tlsKeyPath); keyFileErr == nil {
-			hookServer := admission.NewWebhookServerFromManager(mgr, ctrl.Log)
-			setupLog.Info("start webhook at port" + fmt.Sprintf("%s:%d", hookServer.Host, hookServer.Port))
-		} else {
-			setupLog.Info("TLS key file does not exist, do not start webhook, path:" + tlsKeyPath)
-		}
-	} else {
-		setupLog.Info("TLS certificate file does not exist, do not start webhook, path:" + tlsCertPath)
-	}
+	runWebhookServer(mgr, cfg)
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
@@ -141,4 +140,35 @@ func Run(cfg Config) error {
 	}
 
 	return nil
+}
+
+func runWebhookServer(mgr manager.Manager, cfg Config) {
+	webhookCertDir := cfg.WebhookCertDir
+	if webhookCertDir == "" {
+		webhookCertDir = defaultWebhookCertDir
+	}
+	tlsCertPath := path.Join(webhookCertDir, tlsCertFilename)
+	tlsKeyPath := path.Join(webhookCertDir, tlsKeyFilename)
+	caCertPath := path.Join(webhookCertDir, caCertFilename)
+
+	startWebhook := true
+	if _, err := os.Stat(caCertPath); err != nil {
+		setupLog.Info("CA certificate file does not exist, do not start webhook", "path", caCertPath)
+		return
+	}
+	if _, err := os.Stat(tlsCertPath); err != nil {
+		setupLog.Info("TLS certificate file does not exist, do not start webhook", "path", tlsCertPath)
+		return
+	}
+	if _, err := os.Stat(tlsKeyPath); err != nil {
+		setupLog.Info("TLS key file does not exist, do not start webhook", "path", tlsKeyPath)
+		return
+	}
+
+	if startWebhook {
+		hookServer := admission.NewWebhookServerFromManager(mgr, ctrl.Log)
+		hookServer.CertDir = webhookCertDir
+		setupLog.Info("start webhook server", "listen_address", fmt.Sprintf("%s:%d", hookServer.Host, hookServer.Port))
+	}
+
 }

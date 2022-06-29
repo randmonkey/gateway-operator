@@ -36,7 +36,7 @@ func (v *Validator) Validate(dataplane *operatorv1alpha1.DataPlane) error {
 // ValidateDeployOptions validates the DeploymentOptions field of DataPlane object.
 func (v *Validator) ValidateDeployOptions(namespace string, opts *operatorv1alpha1.DeploymentOptions) error {
 
-	// validata db mode.
+	// validate db mode.
 	dbMode, dbModeFound, err := v.getDBModeFromEnv(namespace, opts.Env)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (v *Validator) getDBModeFromEnvFrom(namespace string, envFroms []corev1.Env
 				// but the alternative is that we would need to validate ALL ConfigMaps on create
 				// and do relational mapping to DataPlane resources to validate that they aren't
 				// going to introduce a new violation, or we would have to do an additional level
-				// of validation that could only run during reconcilation.
+				// of validation that could only run during reconciliation.
 				if err != nil {
 					return "", false, err
 				}
@@ -128,7 +128,7 @@ func (v *Validator) getValueFromConfigMapKeyRef(namespace string, cmKeyRef *core
 	namespacedName := k8stypes.NamespacedName{Namespace: namespace, Name: cmKeyRef.Name}
 	err := v.c.Get(context.Background(), namespacedName, cm)
 	if err != nil {
-		return "", false, fmt.Errorf("failed to get configMap %s in configMapKeyRef, error %w", cmKeyRef.Name, err)
+		return "", false, fmt.Errorf("failed to get configMap %s in configMapKeyRef: %w", cmKeyRef.Name, err)
 	}
 	if cm.Data != nil && cm.Data[cmKeyRef.Key] != "" {
 		return cm.Data[cmKeyRef.Key], true, nil
@@ -141,7 +141,7 @@ func (v *Validator) getValueFromSecretRef(namespace string, secretKeyRef *corev1
 	namespacedName := k8stypes.NamespacedName{Namespace: namespace, Name: secretKeyRef.Name}
 	err := v.c.Get(context.Background(), namespacedName, secret)
 	if err != nil {
-		return "", false, fmt.Errorf("failed to get secret %s in secretRef, error %w", secretKeyRef.Name, err)
+		return "", false, fmt.Errorf("failed to get secret %s in secretRef: %w", secretKeyRef.Name, err)
 	}
 	if secret.Data != nil && len(secret.Data[secretKeyRef.Key]) > 0 {
 		decoded, err := base64.StdEncoding.DecodeString(string(secret.Data[secretKeyRef.Key]))
@@ -157,14 +157,14 @@ func (v *Validator) getDBModeFromConfigMapRef(namespace string, prefix string, c
 	namespacedName := k8stypes.NamespacedName{Namespace: namespace, Name: cmRef.Name}
 	err := v.c.Get(context.Background(), namespacedName, cm)
 	if err != nil {
-		return "", false, fmt.Errorf("failed to get configMap %s in configMapRef, error %w", cmRef.Name, err)
+		return "", false, fmt.Errorf("failed to get configMap %s in configMapRef: %w", cmRef.Name, err)
 	}
 
 	if cm.Data == nil {
 		return "", false, nil
 	}
 
-	// find key in Data that would become `KONG_DATABASE` after concatated to the prefix.
+	// find the key in the Data that would become `KONG_DATABASE` after concatenation with the prefix.
 	suffix := strings.TrimPrefix(consts.EnvVarKongDatabase, prefix)
 	dbMode, ok := cm.Data[suffix]
 	return dbMode, ok, nil
@@ -175,7 +175,7 @@ func (v *Validator) getDBModeFromSecretRef(namespace string, prefix string, secr
 	namespacedName := k8stypes.NamespacedName{Namespace: namespace, Name: secretRef.Name}
 	err := v.c.Get(context.Background(), namespacedName, secret)
 	if err != nil {
-		return "", false, fmt.Errorf("failed to get secret %s in secretRef, error %w", secretRef, err)
+		return "", false, fmt.Errorf("failed to get secret %s in secretRef: %w", secretRef, err)
 	}
 	if secret.Data == nil {
 		return "", false, nil

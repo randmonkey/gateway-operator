@@ -13,9 +13,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	operatorv1alpha1 "github.com/kong/gateway-operator/api/v1alpha1"
+	"github.com/kong/gateway-operator/internal/validation/dataplane"
 )
 
 var (
@@ -26,7 +28,7 @@ var (
 // NewWebhookServerFromManager creates a webhook server in manager.
 func NewWebhookServerFromManager(mgr ctrl.Manager, logger logr.Logger) *webhook.Server {
 	hookServer := mgr.GetWebhookServer()
-	handler := NewRequestHandler(logger)
+	handler := NewRequestHandler(mgr.GetClient(), logger)
 	hookServer.Register("/validate", handler)
 	return hookServer
 }
@@ -46,10 +48,12 @@ type RequestHandler struct {
 }
 
 // NewRequestHandler create a RequestHandler to handle validation requests.
-func NewRequestHandler(l logr.Logger) *RequestHandler {
+func NewRequestHandler(c client.Client, l logr.Logger) *RequestHandler {
 	return &RequestHandler{
-		Validator: &validator{},
-		Logger:    l.WithValues("component", "validation-server"),
+		Validator: &validator{
+			dataplaneValidator: dataplane.NewValidator(c),
+		},
+		Logger: l.WithValues("component", "validation-server"),
 	}
 }
 
