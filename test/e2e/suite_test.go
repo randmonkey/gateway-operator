@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/kong/kubernetes-testing-framework/pkg/clusters"
+	"github.com/kong/kubernetes-testing-framework/pkg/clusters/addons/loadimage"
 	"github.com/kong/kubernetes-testing-framework/pkg/clusters/addons/metallb"
 	"github.com/kong/kubernetes-testing-framework/pkg/clusters/types/kind"
 	"github.com/kong/kubernetes-testing-framework/pkg/environments"
@@ -26,6 +27,8 @@ import (
 
 var (
 	existingClusterName = os.Getenv("KONG_TEST_CLUSTER")
+	imageOverride       = os.Getenv("KONG_TEST_GATEWAY_OPERATOR_IMAGE_OVERRIDE")
+	imageLoad           = os.Getenv("KONG_TEST_GATEWAY_OPERATOR_IMAGE_LOAD")
 )
 
 // -----------------------------------------------------------------------------
@@ -67,7 +70,19 @@ func TestMain(m *testing.M) {
 	if existingCluster != nil {
 		envBuilder.WithExistingCluster(existingCluster)
 	}
-	env, err = envBuilder.WithAddons(metallb.New()).Build(ctx)
+
+	addons := []clusters.Addon{
+		metallb.New(),
+	}
+
+	if imageLoad != "" {
+		imageLoader, err := loadimage.NewBuilder().WithImage(imageLoad)
+		exitOnErr(err)
+		fmt.Println("INFO: load image", imageLoad)
+		addons = append(addons, imageLoader.Build())
+	}
+
+	env, err = envBuilder.WithAddons(addons...).Build(ctx)
 	exitOnErr(err)
 
 	fmt.Printf("INFO: waiting for cluster %s and all addons to become ready\n", env.Cluster().Name())
@@ -82,6 +97,8 @@ func TestMain(m *testing.M) {
 
 	fmt.Println("INFO: creating system namespaces and serviceaccounts")
 	exitOnErr(clusters.CreateNamespace(ctx, env.Cluster(), "kong-system"))
+
+	exitOnErr(setOperatorImage())
 
 	fmt.Println("INFO: deploying operator to test cluster via kustomize")
 	exitOnErr(clusters.KustomizeDeployForCluster(ctx, env.Cluster(), "../../config/default"))

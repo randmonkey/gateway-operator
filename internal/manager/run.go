@@ -168,6 +168,13 @@ func runWebhookServer(mgr manager.Manager, cfg Config) {
 	if startWebhook {
 		hookServer := admission.NewWebhookServerFromManager(mgr, ctrl.Log)
 		hookServer.CertDir = webhookCertDir
+		// add readyz check for checking connection to webhook server
+		// to make the controller to be marked as ready after webhook started.
+		err := mgr.AddReadyzCheck("readyz", mgr.GetWebhookServer().StartedChecker())
+		if err != nil {
+			setupLog.Error(err, "failed to add readiness probe for webhook")
+		}
+
 		setupLog.Info("start webhook server", "listen_address", fmt.Sprintf("%s:%d", hookServer.Host, hookServer.Port))
 	}
 

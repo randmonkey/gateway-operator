@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,7 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	operatorv1alpha1 "github.com/kong/gateway-operator/api/v1alpha1"
+	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
 	"github.com/kong/gateway-operator/internal/consts"
 )
 
@@ -270,8 +270,8 @@ func TestHandleDataplaneValidation(t *testing.T) {
 				Request: &admissionv1.AdmissionRequest{
 					UID: "",
 					Kind: metav1.GroupVersionKind{
-						Group:   operatorv1alpha1.GroupVersion.Group,
-						Version: operatorv1alpha1.GroupVersion.Version,
+						Group:   operatorv1alpha1.SchemeGroupVersion.Group,
+						Version: operatorv1alpha1.SchemeGroupVersion.Version,
 						Kind:    "dataplanes",
 					},
 					Resource:  dataPlaneGVResource,
@@ -290,7 +290,7 @@ func TestHandleDataplaneValidation(t *testing.T) {
 			require.NoError(t, err, "there should be no error in making HTTP request")
 			resp, err := http.DefaultClient.Do(req)
 			require.NoError(t, err, "there should be no error in getting response")
-			body, err := ioutil.ReadAll(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			require.NoError(t, err, "there should be no error in reading body")
 			resp.Body.Close()
 			respReview := &admissionv1.AdmissionReview{}

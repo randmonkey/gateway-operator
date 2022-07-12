@@ -62,13 +62,13 @@ func (r *DataPlaneReconciler) ensureDataPlaneIsMarkedProvisioned(
 	return r.Status().Update(ctx, dataplane)
 }
 
-// isSameCondition returns true if two `metav1.Condition` indicates the same condition.
-func isSameCondition(condition1, condition2 metav1.Condition) bool {
+// isSameDataPlaneCondition returns true if two `metav1.Condition`s
+// indicates the same condition of a `DataPlane` resource.
+func isSameDataPlaneCondition(condition1, condition2 metav1.Condition) bool {
 	return condition1.Type == condition2.Type &&
 		condition1.Status == condition2.Status &&
 		condition1.Reason == condition2.Reason &&
 		condition1.Message == condition2.Message
-	// TODO: should we compare `ObservedGeneration` here?
 }
 
 func (r *DataPlaneReconciler) ensureDataPlaneIsMarkedNotProvisioned(
@@ -92,7 +92,7 @@ func (r *DataPlaneReconciler) ensureDataPlaneIsMarkedNotProvisioned(
 		if condition.Type == string(DataPlaneConditionTypeProvisioned) {
 			conditionFound = true
 			// update the slice if the condition is not the same as we expected.
-			if !isSameCondition(notProvisionedCondition, condition) {
+			if !isSameDataPlaneCondition(notProvisionedCondition, condition) {
 				dataplane.Status.Conditions[i] = notProvisionedCondition
 				shouldUpdate = true
 			}

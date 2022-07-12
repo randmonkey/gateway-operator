@@ -13,7 +13,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	operatorv1alpha1 "github.com/kong/gateway-operator/api/v1alpha1"
+	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
 	"github.com/kong/gateway-operator/controllers"
 	"github.com/kong/gateway-operator/internal/consts"
 	k8sutils "github.com/kong/gateway-operator/internal/utils/kubernetes"
@@ -136,14 +136,14 @@ func testDataplaneReconcileValidation(t *testing.T, namespace *corev1.Namespace)
 		},
 	}
 
-	dataplaneClient := operatorClient.V1alpha1().DataPlanes(namespace.Name)
+	dataplaneClient := operatorClient.ApisV1alpha1().DataPlanes(namespace.Name)
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			dataplane, err := dataplaneClient.Create(ctx, tc.dataplane, metav1.CreateOptions{})
 			require.NoErrorf(t, err, "should not return error when create dataplane for case %s", tc.name)
 			require.Eventually(t, func() bool {
-				dataplane, err = operatorClient.V1alpha1().DataPlanes(namespace.Name).Get(ctx, dataplane.Name, metav1.GetOptions{})
+				dataplane, err = operatorClient.ApisV1alpha1().DataPlanes(namespace.Name).Get(ctx, dataplane.Name, metav1.GetOptions{})
 				require.NoError(t, err)
 				isScheduled := false
 				for _, condition := range dataplane.Status.Conditions {
@@ -276,7 +276,7 @@ func testDataplaneValidatingWebhook(t *testing.T, namespace *corev1.Namespace) {
 		},
 	}
 
-	dataplaneClient := operatorClient.V1alpha1().DataPlanes(namespace.Name)
+	dataplaneClient := operatorClient.ApisV1alpha1().DataPlanes(namespace.Name)
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {

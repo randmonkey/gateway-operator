@@ -8,9 +8,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"testing"
 
@@ -96,7 +97,7 @@ func createValidatingWebhook(ctx context.Context, k8sClient *kubernetes.Clientse
 	if err != nil {
 		return err
 	}
-	caContent, err := ioutil.ReadAll(caFile)
+	caContent, err := io.ReadAll(caFile)
 	if err != nil {
 		return err
 	}

@@ -76,6 +76,7 @@ func (r *DataPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 		return ctrl.Result{}, nil // no need to requeue, the update will trigger.
 	}
+
 	// validate dataplane
 	err = dataplanevalidation.NewValidator(r.Client).Validate(dataplane)
 	if err != nil {

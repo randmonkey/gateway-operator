@@ -251,6 +251,10 @@ test.integration:
 test.e2e:
 	GOFLAGS="-tags=e2e_tests" go test -race -v ./test/e2e/...
 
+# the same as e2e, but used for github actions because the github workflow for e2e would modify contents of manifests in `config`.
+test.e2e.github:
+	GOFLAGS="-tags=e2e_tests" go test -race -v ./test/e2e/...
+
 # ------------------------------------------------------------------------------
 # Debug
 # ------------------------------------------------------------------------------

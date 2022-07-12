@@ -16,7 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	operatorv1alpha1 "github.com/kong/gateway-operator/api/v1alpha1"
+	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
 	"github.com/kong/gateway-operator/internal/validation/dataplane"
 )
 
@@ -101,13 +101,13 @@ func (h *RequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 var (
 	controlPlaneGVResource = metav1.GroupVersionResource{
-		Group:    operatorv1alpha1.GroupVersion.Group,
-		Version:  operatorv1alpha1.GroupVersion.Version,
+		Group:    operatorv1alpha1.SchemeGroupVersion.Group,
+		Version:  operatorv1alpha1.SchemeGroupVersion.Version,
 		Resource: "controlplanes",
 	}
 	dataPlaneGVResource = metav1.GroupVersionResource{
-		Group:    operatorv1alpha1.GroupVersion.Group,
-		Version:  operatorv1alpha1.GroupVersion.Version,
+		Group:    operatorv1alpha1.SchemeGroupVersion.Group,
+		Version:  operatorv1alpha1.SchemeGroupVersion.Version,
 		Resource: "dataplanes",
 	}
 )
