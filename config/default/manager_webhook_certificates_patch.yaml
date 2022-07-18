@@ -23,4 +23,3 @@ spec:
         - name: webhook-certificates
           mountPath: /tmp/k8s-webhook-server/serving-certs
           readOnly: true
-        

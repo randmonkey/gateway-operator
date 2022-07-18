@@ -58,9 +58,6 @@ KIC_ROLE_GENERATOR = $(PROJECT_DIR)/bin/kic-role-generator
 .PHONY: kic-role-generator
 kic-role-generator:
 	go build -o $(KIC_ROLE_GENERATOR) ./hack/generators/kic-role-generator
-GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
-golangci-lint: ## Download golangci-lint locally if necessary.
-	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.2)
 
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/controller-gen
 .PHONY: controller-gen
@@ -76,6 +73,11 @@ CLIENT_GEN = $(PROJECT_DIR)/bin/client-gen
 .PHONY: client-gen
 client-gen: ## Download client-gen locally if necessary.
 	@$(MAKE) _download_tool TOOL=client-gen
+
+GOLANGCI_LINT = $(PROJECT_DIR)/bin/golangci-lint
+.PHONY: golangci-lint
+golangci-lint: ## Download golangci-lint locally if necessary.
+	@$(MAKE) _download_tool TOOL=golangci-lint
 
 # ------------------------------------------------------------------------------
 # Build
@@ -249,10 +251,6 @@ test.integration:
 
 .PHONY: test.e2e
 test.e2e:
-	GOFLAGS="-tags=e2e_tests" go test -race -v ./test/e2e/...
-
-# the same as e2e, but used for github actions because the github workflow for e2e would modify contents of manifests in `config`.
-test.e2e.github:
 	GOFLAGS="-tags=e2e_tests" go test -race -v ./test/e2e/...
 
 # ------------------------------------------------------------------------------

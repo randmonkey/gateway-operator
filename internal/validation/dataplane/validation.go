@@ -30,6 +30,7 @@ func (v *Validator) Validate(dataplane *operatorv1alpha1.DataPlane) error {
 	if err != nil {
 		return err
 	}
+	// prepared for more validations
 	return nil
 }
 

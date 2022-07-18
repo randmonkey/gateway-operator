@@ -16,7 +16,7 @@ import (
 
 func TestDataplaneValidatingWebhook(t *testing.T) {
 	t.Log("start tests")
-	testNamespace, cleanup := namespace(t)
+	testNamespace, cleanup := createNamespaceForTest(t)
 	defer cleanup()
 
 	testCases := []struct {
@@ -67,7 +67,6 @@ func TestDataplaneValidatingWebhook(t *testing.T) {
 				require.Error(t, err, "test case %s: should return error", tc.name)
 				require.Containsf(t, err.Error(), tc.errMsg, "test case %s: error message should contain expected content", tc.name)
 			}
-
 		})
 	}
 }

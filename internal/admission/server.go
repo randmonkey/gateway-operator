@@ -115,22 +115,25 @@ var (
 func (h *RequestHandler) handleValidation(ctx context.Context, req *admissionv1.AdmissionRequest) (
 	*admissionv1.AdmissionResponse, error) {
 
-	deserializer := codecs.UniversalDeserializer()
-
-	var response admissionv1.AdmissionResponse
-	ok := true
-	msg := ""
-
 	if req == nil {
-		response.Allowed = false
-		response.Result = &metav1.Status{
-			Code:    http.StatusBadRequest,
-			Reason:  metav1.StatusReasonBadRequest,
-			Message: "empty request",
-			Status:  metav1.StatusFailure,
-		}
-		return &response, nil
+		return &admissionv1.AdmissionResponse{
+			Allowed: false,
+			Result: &metav1.Status{
+				Code:    http.StatusBadRequest,
+				Reason:  metav1.StatusReasonBadRequest,
+				Message: "empty request",
+				Status:  metav1.StatusFailure,
+			},
+		}, nil
 	}
+
+	var (
+		response     admissionv1.AdmissionResponse
+		ok           = true
+		msg          string
+		deserializer = codecs.UniversalDeserializer()
+	)
+
 	switch req.Resource {
 	case controlPlaneGVResource:
 		controlPlane := operatorv1alpha1.ControlPlane{}

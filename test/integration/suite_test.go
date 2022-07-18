@@ -6,9 +6,9 @@ package integration
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -134,32 +134,13 @@ func TestMain(m *testing.M) {
 	exitOnErr(clusters.KustomizeDeployForCluster(ctx, env.Cluster(), gatewayAPIsCRDs))
 	exitOnErr(waitForCRDs(ctx))
 
-	// prepare for running webhook if we are going to run webhook tests. includes:
-	// - creating self-signed TLS certificates for webhook server
-	// - creating validaing webhook in test environment
 	runWebhookTests = (os.Getenv("RUN_WEBHOOK_TESTS") == "true")
 	if runWebhookTests {
-		// get IP for genrating certificate and for clients to access.
-		if webhookServerIP == "" {
-			var getIPErr error
-			webhookServerIP, err = getFirstNonLoopbackIP()
-			exitOnErr(getIPErr)
-		}
-
-		// generate certificates for webhooks.
-		// must run before we start controller manager to start webhook server in controller.
-		exitOnErr(generateWebhookCertificates())
-
-		// create webhook resources in k8s.
-		fmt.Println("INFO: creating a validating webhook and waiting for it to start")
-		err = createValidatingWebhook(ctx, k8sClient,
-			fmt.Sprintf("https://%s:%d/validate", webhookServerIP, webhookServerPort),
-			webhookCertDir+"/ca.crt")
-		exitOnErr(err)
+		exitOnErr(prepareWebhook())
 	}
 
 	fmt.Println("INFO: starting the operator's controller manager")
-	startControllerManager()
+	go startControllerManager()
 
 	// wait for webhook server in controller to be ready after controller started.
 	if runWebhookTests {
@@ -259,9 +240,8 @@ func startControllerManager() {
 		fmt.Printf("INFO: controller output is being logged to %s\n", out.Name())
 		defer out.Close()
 	}
-	go func() {
-		exitOnErr(manager.Run(cfg))
-	}()
+
+	exitOnErr(manager.Run(cfg))
 }
 
 func waitForCRDs(ctx context.Context) error {
@@ -294,16 +274,75 @@ func generateWebhookCertificates() error {
 	return cmd.Run()
 }
 
+// prepareWebhook prepares for running webhook if we are going to run webhook tests. includes:
+// - creating self-signed TLS certificates for webhook server
+// - creating validaing webhook resource in test cluster
+func prepareWebhook() error {
+	// get IP for generating certificate and for clients to access.
+	if webhookServerIP == "" {
+		var getIPErr error
+		webhookServerIP, getIPErr = getFirstNonLoopbackIP()
+		if getIPErr != nil {
+			return getIPErr
+		}
+	}
+
+	// generate certificates for webhooks.
+	// must run before we start controller manager to start webhook server in controller.
+	err := generateWebhookCertificates()
+	if err != nil {
+		return err
+	}
+
+	// create webhook resources in k8s.
+	fmt.Println("INFO: creating a validating webhook and waiting for it to start")
+	return createValidatingWebhook(
+		ctx, k8sClient,
+		fmt.Sprintf("https://%s:%d/validate", webhookServerIP, webhookServerPort),
+		webhookCertDir+"/ca.crt",
+	)
+}
+
+// waitForWebhook waits for webhook server being able to be accessed by HTTPS.
 func waitForWebhook(ctx context.Context, ip string, port int) error {
 	ready := false
+
+	certFile := webhookCertDir + "/tls.crt"
+	keyFile := webhookCertDir + "/tls.key"
+	caFile := webhookCertDir + "/ca.crt"
+
+	// Load client cert
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return err
+	}
+
+	// Load CA cert
+	caCert, err := os.ReadFile(caFile)
+	if err != nil {
+		return err
+	}
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	// Setup HTTPS client
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      caCertPool,
+	}
+	tlsConfig.BuildNameToCertificate()
+	transport := &http.Transport{TLSClientConfig: tlsConfig}
+	client := &http.Client{Transport: transport}
+
 	for !ready {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", ip, port))
+			// any kind of response from /validate path is considered OK
+			_, err := client.Get(fmt.Sprintf("https://%s:%d/validate", ip, port))
 			if err == nil {
-				conn.Close()
 				ready = true
 			}
 		}

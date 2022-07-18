@@ -16,9 +16,5 @@ func (v *validator) ValidateControlPlane(ctx context.Context, controlPlane opera
 }
 
 func (v *validator) ValidateDataPlane(ctx context.Context, dataPlane operatorv1alpha1.DataPlane) error {
-	err := v.dataplaneValidator.Validate(&dataPlane)
-	if err != nil {
-		return err
-	}
-	return nil
+	return v.dataplaneValidator.Validate(&dataPlane)
 }

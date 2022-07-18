@@ -32,6 +32,19 @@ var (
 )
 
 // -----------------------------------------------------------------------------
+// Testing Vars - path of kustomization directories and files
+// -----------------------------------------------------------------------------
+
+var (
+	kustomizationDir  = "../../config/default"
+	kustomizationFile = kustomizationDir + "/kustomization.yaml"
+	// backupKustomizationFile is used to save the original kustomization file if we modified it.
+	// iIf the kustomization file is changed multiple times,
+	// only the content before the first change should be used as backup to keep the content as same as the origin.
+	backupKustomizationFile = ""
+)
+
+// -----------------------------------------------------------------------------
 // Testing Vars - Testing Environment
 // -----------------------------------------------------------------------------
 
@@ -101,7 +114,7 @@ func TestMain(m *testing.M) {
 	exitOnErr(setOperatorImage())
 
 	fmt.Println("INFO: deploying operator to test cluster via kustomize")
-	exitOnErr(clusters.KustomizeDeployForCluster(ctx, env.Cluster(), "../../config/default"))
+	exitOnErr(clusters.KustomizeDeployForCluster(ctx, env.Cluster(), kustomizationDir))
 
 	fmt.Println("INFO: waiting for operator deployment to complete")
 	exitOnErr(waitForOperatorDeployment())
@@ -111,11 +124,13 @@ func TestMain(m *testing.M) {
 
 	if skipClusterCleanup {
 		fmt.Println("INFO: cleaning up operator manifests")
-		exitOnErr(clusters.KustomizeDeleteForCluster(ctx, env.Cluster(), "../../config/default"))
+		exitOnErr(clusters.KustomizeDeleteForCluster(ctx, env.Cluster(), kustomizationDir))
 	} else {
 		fmt.Println("INFO: cleaning up testing cluster and environment")
 		exitOnErr(env.Cleanup(ctx))
 	}
+
+	exitOnErr(restoreKustomizationFile())
 
 	os.Exit(code)
 }
