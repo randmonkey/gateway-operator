@@ -11,7 +11,7 @@ require (
 	github.com/kong/kubernetes-telemetry v0.0.0-20220819082419-d27dcce6d46c
 	github.com/kong/kubernetes-testing-framework v0.19.0
 	github.com/stretchr/testify v1.8.0
-	k8s.io/api v0.24.4
+	k8s.io/api v0.25.0
 	k8s.io/apimachinery v0.25.0
 	k8s.io/client-go v0.24.4
 	k8s.io/utils v0.0.0-20220728103510-ee6ede2d64ed
