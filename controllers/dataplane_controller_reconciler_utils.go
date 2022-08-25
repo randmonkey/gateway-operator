@@ -162,6 +162,12 @@ func (r *DataPlaneReconciler) ensureDeploymentForDataPlane(
 		existingDeployment := &deployments[0]
 		updated, existingDeployment.ObjectMeta = k8sutils.EnsureObjectMetaIsUpdated(existingDeployment.ObjectMeta, generatedDeployment.ObjectMeta)
 
+		// update cluster certiifcate if needed.
+		if r.deploymentSpecVolumesNeedsUpdate(&existingDeployment.Spec, &generatedDeployment.Spec) {
+			existingDeployment.Spec.Template.Spec.Volumes = generatedDeployment.Spec.Template.Spec.Volumes
+			updated = true
+		}
+
 		// We do not want to permit direct edits of the Deployment environment. Any user-supplied values should be set
 		// in the DataPlane. If the actual Deployment environment does not match the generated environment, either
 		// something requires an update or there was a manual edit we want to purge.
@@ -199,6 +205,29 @@ func (r *DataPlaneReconciler) ensureDeploymentForDataPlane(
 	}
 
 	return true, generatedDeployment, r.Client.Create(ctx, generatedDeployment)
+}
+
+func (r *DataPlaneReconciler) deploymentSpecVolumesNeedsUpdate(
+	existingDeploymentSpec *appsv1.DeploymentSpec,
+	generatedDeploymentSpec *appsv1.DeploymentSpec,
+) bool {
+
+	generatedClusterCertVolume := k8sresources.GetPodVolumeByName(&generatedDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	existingClusterCertVolume := k8sresources.GetPodVolumeByName(&existingDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	// check for cluster certificate volume.
+	if generatedClusterCertVolume == nil || existingClusterCertVolume == nil {
+		return true
+	}
+
+	if generatedClusterCertVolume.Secret == nil || existingClusterCertVolume.Secret == nil {
+		return true
+	}
+
+	if generatedClusterCertVolume.Secret.SecretName != existingClusterCertVolume.Secret.SecretName {
+		return true
+	}
+
+	return false
 }
 
 func (r *DataPlaneReconciler) ensureServiceForDataPlane(

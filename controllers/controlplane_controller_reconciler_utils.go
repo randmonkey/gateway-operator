@@ -175,6 +175,19 @@ func (r *ControlPlaneReconciler) ensureDeploymentForControlPlane(
 			updated = true
 		}
 
+		// update cluster certificate volumes if needed.
+		if r.deploymentSpecVolumesNeedsUpdate(&generatedDeployment.Spec, &existingDeployment.Spec) {
+			existingDeployment.Spec.Template.Spec.Volumes = generatedDeployment.Spec.Template.Spec.Volumes
+			updated = true
+		}
+
+		// update service account name if needed.
+		if generatedDeployment.Spec.Template.Spec.ServiceAccountName !=
+			existingDeployment.Spec.Template.Spec.ServiceAccountName {
+			existingDeployment.Spec.Template.Spec.ServiceAccountName = generatedDeployment.Spec.Template.Spec.ServiceAccountName
+			updated = true
+		}
+
 		// We do not want to permit direct edits of the Deployment environment. Any user-supplied values should be set
 		// in the ControlPlane. If the actual Deployment environment does not match the generated environment, either
 		// something requires an update (e.g. the associated DataPlane Service changed and value generation changed the
@@ -383,4 +396,28 @@ func (r *ControlPlaneReconciler) ensureOwnedClusterRoleBindingsDeleted(
 	}
 
 	return deleted, deletionErr.ErrorOrNil()
+}
+
+// deploymentSpecVolumesNeedsUpdate returns true if the volumes in deployment
+// for controlplane needs to be updated.
+func (r *ControlPlaneReconciler) deploymentSpecVolumesNeedsUpdate(
+	generatedDeploymentSpec *appsv1.DeploymentSpec,
+	existingDeploymentSpec *appsv1.DeploymentSpec,
+) bool {
+	generatedClusterCertVolume := k8sresources.GetPodVolumeByName(&generatedDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	existingClusterCertVolume := k8sresources.GetPodVolumeByName(&existingDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	// check for cluster certificate volume.
+	if generatedClusterCertVolume == nil || existingClusterCertVolume == nil {
+		return true
+	}
+
+	if generatedClusterCertVolume.Secret == nil || existingClusterCertVolume.Secret == nil {
+		return true
+	}
+
+	if generatedClusterCertVolume.Secret.SecretName != existingClusterCertVolume.Secret.SecretName {
+		return true
+	}
+
+	return false
 }
