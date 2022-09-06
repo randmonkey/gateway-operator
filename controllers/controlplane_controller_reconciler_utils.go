@@ -147,13 +147,13 @@ func (r *ControlPlaneReconciler) ensureDeploymentForControlPlane(
 		var updated bool
 		existingDeployment := &deployments[0]
 		updated, existingDeployment.ObjectMeta = k8sutils.EnsureObjectMetaIsUpdated(existingDeployment.ObjectMeta, generatedDeployment.ObjectMeta)
-		container := k8sresources.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
+		container := k8sutils.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
 		if container == nil {
 			// someone has deleted the main container from the Deployment for ??? reasons. we can't fathom why they
 			// would do this, but don't allow it and replace the container set entirely
 			existingDeployment.Spec.Template.Spec.Containers = generatedDeployment.Spec.Template.Spec.Containers
 			updated = true
-			container = k8sresources.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
+			container = k8sutils.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
 		}
 
 		replicas := existingDeployment.Spec.Replicas
@@ -404,8 +404,8 @@ func (r *ControlPlaneReconciler) deploymentSpecVolumesNeedsUpdate(
 	generatedDeploymentSpec *appsv1.DeploymentSpec,
 	existingDeploymentSpec *appsv1.DeploymentSpec,
 ) bool {
-	generatedClusterCertVolume := k8sresources.GetPodVolumeByName(&generatedDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
-	existingClusterCertVolume := k8sresources.GetPodVolumeByName(&existingDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	generatedClusterCertVolume := k8sutils.GetPodVolumeByName(&generatedDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	existingClusterCertVolume := k8sutils.GetPodVolumeByName(&existingDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
 	// check for cluster certificate volume.
 	if generatedClusterCertVolume == nil || existingClusterCertVolume == nil {
 		return true

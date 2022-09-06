@@ -259,15 +259,16 @@ func (r *GatewayReconciler) provisionDataPlane(ctx context.Context,
 		expectedDataplaneDeploymentOptions = gatewayConfig.Spec.DataPlaneDeploymentOptions
 	}
 	if !dataplaneSpecDeepEqual(&dataplane.Spec.DataPlaneDeploymentOptions, expectedDataplaneDeploymentOptions) {
-		debug(log, "dataplane config is out of date, updating", gateway)
+		trace(log, "dataplane config is out of date, updating", gateway)
 		dataplane.Spec.DataPlaneDeploymentOptions = *expectedDataplaneDeploymentOptions
-		debug(log, "dataplane should be updated to expected state", dataplane)
+
 		err = r.Client.Update(ctx, dataplane)
 		if err != nil {
 			k8sutils.SetCondition(createDataPlaneCondition(metav1.ConditionFalse, k8sutils.UnableToProvisionReason, err.Error()), gateway)
 			return nil
 		}
 		k8sutils.SetCondition(createDataPlaneCondition(metav1.ConditionFalse, k8sutils.ResourceCreatedOrUpdatedReason, k8sutils.ResourceUpdatedMessage), gateway)
+		debug(log, "dataplane config updated", gateway)
 	}
 
 	trace(log, "waiting for dataplane readiness", gateway)

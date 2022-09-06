@@ -19,7 +19,7 @@ import (
 
 	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
 	"github.com/kong/gateway-operator/internal/consts"
-	k8sresources "github.com/kong/gateway-operator/internal/utils/kubernetes/resources"
+	k8sutils "github.com/kong/gateway-operator/internal/utils/kubernetes"
 	testutils "github.com/kong/gateway-operator/internal/utils/test"
 )
 
@@ -231,7 +231,7 @@ func TestControlPlaneEssentials(t *testing.T) {
 }
 
 func checkControlPlaneDeploymentEnvVars(t *testing.T, deployment *appsv1.Deployment) {
-	controllerContainer := k8sresources.GetPodContainerByName(&deployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
+	controllerContainer := k8sutils.GetPodContainerByName(&deployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
 	require.NotNil(t, controllerContainer)
 
 	envs := controllerContainer.Env
@@ -327,7 +327,7 @@ func TestControPlaneUpdate(t *testing.T) {
 	deployment := &deployments[0]
 
 	t.Logf("verifying environment variable TEST_ENV in deployment before update")
-	container := k8sresources.GetPodContainerByName(&deployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
+	container := k8sutils.GetPodContainerByName(&deployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
 	require.NotNil(t, container)
 	testEnv := getEnvValueByName(container.Env, "TEST_ENV")
 	require.Equal(t, "before_update", testEnv)
@@ -349,7 +349,7 @@ func TestControPlaneUpdate(t *testing.T) {
 		require.Len(t, deployments, 1, "There must be only one ControlPlane deployment")
 		deployment := &deployments[0]
 
-		container := k8sresources.GetPodContainerByName(&deployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
+		container := k8sutils.GetPodContainerByName(&deployment.Spec.Template.Spec, consts.ControlPlaneControllerContainerName)
 		require.NotNil(t, container)
 		testEnv := getEnvValueByName(container.Env, "TEST_ENV")
 		t.Logf("Tenvironment variable TEST_ENV is now %s in deployment", testEnv)

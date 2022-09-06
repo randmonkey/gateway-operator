@@ -13,7 +13,6 @@ import (
 	operatorv1alpha1 "github.com/kong/gateway-operator/apis/v1alpha1"
 	"github.com/kong/gateway-operator/internal/consts"
 	k8sutils "github.com/kong/gateway-operator/internal/utils/kubernetes"
-	k8sresources "github.com/kong/gateway-operator/internal/utils/kubernetes/resources"
 )
 
 // -----------------------------------------------------------------------------
@@ -171,13 +170,13 @@ func (r *DataPlaneReconciler) ensureDeploymentForDataPlane(
 		// We do not want to permit direct edits of the Deployment environment. Any user-supplied values should be set
 		// in the DataPlane. If the actual Deployment environment does not match the generated environment, either
 		// something requires an update or there was a manual edit we want to purge.
-		container := k8sresources.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.DataPlaneProxyContainerName)
+		container := k8sutils.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.DataPlaneProxyContainerName)
 		if container == nil {
 			// someone has deleted the main container from the Deployment for ??? reasons. we can't fathom why they
 			// would do this, but don't allow it and replace the container set entirely
 			existingDeployment.Spec.Template.Spec.Containers = generatedDeployment.Spec.Template.Spec.Containers
 			updated = true
-			container = k8sresources.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.DataPlaneProxyContainerName)
+			container = k8sutils.GetPodContainerByName(&existingDeployment.Spec.Template.Spec, consts.DataPlaneProxyContainerName)
 		}
 		if !reflect.DeepEqual(container.Env, dataplane.Spec.Env) {
 			container.Env = dataplane.Spec.Env
@@ -212,8 +211,8 @@ func (r *DataPlaneReconciler) deploymentSpecVolumesNeedsUpdate(
 	generatedDeploymentSpec *appsv1.DeploymentSpec,
 ) bool {
 
-	generatedClusterCertVolume := k8sresources.GetPodVolumeByName(&generatedDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
-	existingClusterCertVolume := k8sresources.GetPodVolumeByName(&existingDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	generatedClusterCertVolume := k8sutils.GetPodVolumeByName(&generatedDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
+	existingClusterCertVolume := k8sutils.GetPodVolumeByName(&existingDeploymentSpec.Template.Spec, consts.ClusterCertificateVolume)
 	// check for cluster certificate volume.
 	if generatedClusterCertVolume == nil || existingClusterCertVolume == nil {
 		return true
