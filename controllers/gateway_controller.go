@@ -343,9 +343,8 @@ func (r *GatewayReconciler) provisionControlPlane(
 	}
 
 	if !controlplaneSpecDeepEqual(&controlplane.Spec.ControlPlaneDeploymentOptions, expectedControlplaneDeploymentOptions) {
-		debug(log, "controlplane config is out of date, updating", gateway)
+		trace(log, "controlplane config is out of date, updating", gateway)
 		controlplane.Spec.ControlPlaneDeploymentOptions = *expectedControlplaneDeploymentOptions
-		debug(log, "controlplane should be updated to expected state", controlplane)
 		err = r.Client.Update(ctx, controlplane)
 		if err != nil {
 			k8sutils.SetCondition(createControlPlaneCondition(metav1.ConditionFalse, k8sutils.UnableToProvisionReason, err.Error()), gateway)
