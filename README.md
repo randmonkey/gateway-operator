@@ -50,7 +50,7 @@ For example, deploy the following `GatewayClass`:
 
 ```yaml
 kind: GatewayClass
-apiVersion: gateway.networking.k8s.io/v1alpha2
+apiVersion: gateway.networking.k8s.io/v1beta1
 metadata:
   name: kong
 spec:
@@ -61,7 +61,7 @@ and `Gateway`:
 
 ```yaml
 kind: Gateway
-apiVersion: gateway.networking.k8s.io/v1alpha2
+apiVersion: gateway.networking.k8s.io/v1beta1
 metadata:
   name: kong
 spec:
@@ -145,7 +145,7 @@ until referenced by a `GatewayClass`:
 
 ```yaml
 kind: GatewayClass
-apiVersion: gateway.networking.k8s.io/v1alpha2
+apiVersion: gateway.networking.k8s.io/v1beta1
 metadata:
   name: kong
 spec:
@@ -237,7 +237,7 @@ You can use Kong enterprise as the dataplane by doing as follows:
 
     ```yaml
     kind: GatewayClass
-    apiVersion: gateway.networking.k8s.io/v1alpha2
+    apiVersion: gateway.networking.k8s.io/v1beta1
     metadata:
       name: kong
     spec:
@@ -253,7 +253,7 @@ You can use Kong enterprise as the dataplane by doing as follows:
 
     ```yaml
     kind: Gateway
-    apiVersion: gateway.networking.k8s.io/v1alpha2
+    apiVersion: gateway.networking.k8s.io/v1beta1
     metadata:
       name: kong
       namespace: <your-namespace>
