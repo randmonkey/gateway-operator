@@ -14,7 +14,6 @@ A [Kubernetes Operator][k8soperator] for the [Kong Gateway][kong].
 
 [k8soperator]:https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
 [kong]:https://konghq.com
-[helmop]:https://github.com/kong/kong-operator
 
 ### Deployment
 
@@ -22,7 +21,7 @@ Prior to deployment, Kong and [Gateway API][gwapi] CRDs need to be deployed:
 
 ```console
 kubectl kustomize https://github.com/Kong/kubernetes-ingress-controller/config/crd | kubectl apply -f -
-kubectl kustomize https://github.com/kubernetes-sigs/gateway-api/config/crd | kubectl apply -f -
+kubectl kustomize https://github.com/kubernetes-sigs/gateway-api/config/crd?ref=v0.5.0 | kubectl apply -f -
 ```
 
 Deploy the operator with the following one-liner:
@@ -288,6 +287,32 @@ You can use Kong enterprise as the dataplane by doing as follows:
     ```
 
 > **Note**: the license secret, the `GatewayConfiguration`, and the `Gateway` MUST be created in the same namespace.
+
+### Development
+
+#### Prerequisites
+
+In order to build the operator you'll have to have Go installed on your machine.
+In order to do so, follow instructions on [its website][go-dev-site].
+
+#### Build process
+
+Building the operator should be as simple as running:
+
+```console
+make build
+```
+
+This `Makefile` target will take care of everything from generating client side code,
+generating Kubernetes manifests, downloading the dependencies and the tools used
+in the build process and finally it will build the binary.
+
+After this step has finished successfully you should see the operator's binary `bin/manager`.
+
+You can also run it directly via `make run` which will run the operator on your
+machine against the cluster that you have configured via your `KUBECONFIG`.
+
+[go-dev-site]: https://go.dev/
 
 ### Seeking Help
 
