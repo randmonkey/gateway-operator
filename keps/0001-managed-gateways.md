@@ -235,6 +235,27 @@ This milestone covers getting full and published documentation for the Gateway
 Operator published on the [Kong Documentation Site][kongdocs] under it's own
 product listing.
 
+Notes about documentation: the original vision for the documentation for this
+project was for documentation to be considered one of the most (if not the
+most) important components of the software. A "guide first" approach is desired
+based on the expected common use cases and paths, with advanced configurations
+and functionality nested under some caveats which clearly define the actual
+situations under which they would be required.
+
+Additionally the following key features are desired:
+
+- working examples provided for all configuration options (within reason)
+- documentation is _testable_ and includes testing CI workflows: CI literally
+  can test the examples and ensure they continue working over time (this may
+  require the help of the maintainers of docs.konghq.com to help us add the
+  relevant provisions)
+- a compatibility matrix for cloud providers AND Kubernetes versions that is
+  automatically updated based on testing in the operator repository (e.g. when
+  new version support is added, CI automatically puts in a docs PR to update the
+  version matrix)
+- upfront and complete guides for any cloud providers we support: (for example,
+  (but not decided at the time of writing): GKE, EKS, AKS, Openshift)
+
 View this milestone and all its issues on Github [here][gom16].
 
 [kongdocs]:https://docs.konghq.com
