@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41E Bug"
-about: Something is not working as indended.
+about: Something is not working as intended.
 title: ''
 labels: bug
 assignees: ''
