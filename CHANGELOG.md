@@ -4,7 +4,9 @@
 
 - [v0.1.0](#v010)
 
-## v0.1.0 (unreleased)
+## v0.1.0
+
+> Release date: 2022-09-15
 
 **Maturity: ALPHA**
 
