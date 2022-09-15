@@ -35,4 +35,11 @@ gateways for ingress traffic.
   certificates.
   [#103](https://github.com/Kong/gateway-operator/issues/103)
 
+### Known issues
+
+When deploying the gateway-operator through the bundle, there might be some
+leftovers from previous operator deployments in the cluster. The user needs to delete all the cluster-wide leftovers
+(clusterrole, clusterrolebinding, validatingWebhookConfiguration) before
+re-installing the operator through the bundle.
+
 [v0.1.0]: https://github.com/Kong/gateway-operator/tree/v0.1.0
