@@ -27,7 +27,6 @@ The package [internal/consts][consts-pkg] contains a list of default versions fo
 
 Also, the Makefile contains hardcoded information that needs to be updated:
 
-- `VERSION` - the version of the operator.
 - `CHANNELS` - the channels the operator is available on the OpenShift Operator Hub. For the technical preview we're using `alpha` channels. Please refer to the [OLM docs][olm-channels] for more information.
 - `OPENSHIFT_SUPPORTED_VERSIONS` - the supported versions of OpenShift.
 
