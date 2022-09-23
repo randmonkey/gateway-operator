@@ -43,13 +43,14 @@ The Redhat Certified Operators bundles has a env vars file that needs to be upda
 
 ### OperatorHub Community Operators steps
 
-<!-- TODO: This section needs more to be considered done -->
 [Operator Hub Community Operators][operator-hub-community]
+
+- [ ] PR to the [community operators][operator-hub-community] repository should be created by a CI. Please check that the PR exists in the [community operators][operator-hub-community] repository.
 
 
 ### Red Hat Certified Operators Steps
 
-Please refer to the [Operator Certification Guide][operator-certification-pipeline] for more information .
+Please refer to the [Operator Certification Guide][operator-certification-pipeline] for more information.
 
 - [ ] The release should created a new branch in [the redhat certified operators repository fork][certified-operators-fork] named `kong-gateway-operator-<version>`.
 - [ ] Verify that the [the redhat certified operators repository fork][certified-operators-fork] has the new branch and generated bundle is present in subdirectory `operators/kong-gateway-operator/<version>`.
