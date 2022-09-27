@@ -14,8 +14,9 @@ assignees: ''
 - [ ] Check the existing [releases][releases] and determine the next version number.
 - [ ] From [GitHub release action][release-action], start a new workflow run with the `release` input set to the release tag (e.g. `v0.1.0`).
 - [ ] Wait for the workflow to complete.
-- [ ] Check the release notes from [releases][releases] and make sure everything is OK.
 - [ ] Submit the operator to [external hubs](#submit-to-external-hubs).
+- [ ] The CI should create a PR that syncs the release branch to the `main` branch. Merge it.
+- [ ] After the PR is merged, a new release should be created automatically. Check the [releases][releases] page.
 
 ## Verify default hardcoded versions
 
@@ -88,6 +89,59 @@ spec:
     requests:
       storage: 5Gi
 ```
+
+## Troubleshooting
+
+### The release needs to be started again with the same tag.
+
+If the release workflow needs to be started again with the same input version, the release branch needs to be deleted. The release branch is created by the CI and it's named `release/v<version>`. For example, if the release version is `v0.1.0`, the release branch will be `release/v0.1.0`.
+
+It's only safe to start a release workflow with the version that was previously used if:
+
+  - The release PR to the gateway-operator repo is not merged yet.
+  - The external hub PRs are not merged yet. 
+  - The tag that matches the release version does not exist.
+
+Otherwise, if the above conditions are not meet, the release cannot be restarted. A new release needs to be started with an input version that would be next in semantic versioning.
+
+Steps:
+
+1. Delete the `release/v<version>` branch.
+2. Delete the PR created by a release workflow.
+3. Update the repository with the correct changes.
+4. Start a new release workflow run.
+
+
+### OperatorHub Community Operators PR failed
+
+When the release workflow is restarted with the same input version, the OperatorHub Community Operators PR might fail. This is because the PR already exists in the [community operators][operator-hub-community] repository. The PR needs to be closed manually.
+
+#### Option 1: Manually fix the the PR
+
+Steps:
+
+1. Checkout the [community operators fork][certified-operators-fork] repository.
+2. Checkout the branch named `kong-gateway-operator-<version>`.
+3. Fix the PR.
+4. Commit the changes. The commits need to have a `signed-off-by` clause. (`git commit -s`)
+5. Push the changes to the [community operators fork][certified-operators-fork]. 
+
+#### Option 2: Re-run the workflow
+
+It's only safe to do so if:
+
+  - The release PR to the gateway-operator repo is not merged yet.
+  - The external hub PRs are not merged yet. 
+  - The tag that matches the release version does not exist.
+
+Otherwise, if the above condition are not meet, the release cannot be restarted. Instead, use the [Option 1](#option-1-manually-fix-the-the-pr).
+
+Steps:
+
+1. Login to GitHub as `team-k8s-bot`
+2. Delete the PR together with the branch from the [community operators fork][certified-operators-fork] repository.
+3. Delete the release from the [releases][releases] page.
+4. Start a new release workflow run.
 
 
 [releases]: https://github.com/Kong/gateway-operator/releases
