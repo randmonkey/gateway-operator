@@ -7,6 +7,13 @@
 
 ## Unreleased
 
+> Release date: TBD
+
+### Added
+
+- Updated default Kong version to 3.0.0
+- Updated default Kubernetes Ingress Controller version to 2.7
+
 **Maturity: ALPHA**
 
 ## v0.1.1
