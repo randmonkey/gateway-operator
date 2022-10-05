@@ -13,6 +13,9 @@
 
 - Updated default Kong version to 3.0.0
 - Updated default Kubernetes Ingress Controller version to 2.7
+- Update DataPlane and ControlPlane Ready condition when underlying Deployment
+  changes Ready condition
+  [#451](https://github.com/Kong/gateway-operator/pull/451)
 
 **Maturity: ALPHA**
 
