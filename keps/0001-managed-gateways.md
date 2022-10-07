@@ -125,6 +125,130 @@ long term.
 [ohub]:https://operatorhub.io/
 [prjx]:https://www.cncf.io/projects/
 
+#### Supported Scaling Modes & Network Topologies
+
+Providing managed `Gateways` (or headless `DataPlanes`) has implications for
+network topology: A `Gateway` may have one or many underlying "instances"\
+(think `Pods`, system processes, e.t.c.) and may have a control plane that is
+network adjacent, or running somewhere outside of the local cluster. `Gateways`,
+`ControlPlanes` and `DataPlanes` can all potentially be vertically or
+horizontally scaled resulting in changes to network topology for application and
+control plane traffic. The purpose of this section is to document the specific
+scaling modes that we intend to support, and highlight the network topologies
+they represent according to application and control plane traffic flow. Some
+scaling modes can be used in combination with others.
+
+##### Vertical DataPlane Scalability Mode
+
+Vertical DataPlane Scalability Mode is the default and most basic: instances of
+the `ControlPlane` and `DataPlane` can be scaled to support more workloads.
+This scaling is done "vertically" by changing their CPU or Memory resource
+availability and allowing the components to consume more cluster resources
+The `Gateway` and `GatewayConfiguration` APIs are used to implement this. This
+mode can be combined with other scaling modes.
+
+###### User Interface
+
+Since this is a vertical scaling mode the most important tunables are the CPU
+and Memory of the underlying `DataPlane`'s `Pod`. Sane defaults will be applied
+to `Pods` to avoid unbounded consumption, and the `GatewayConfiguration` will
+provide fields for managing the maximum CPU and memory utilization in order to
+increase the ceiling when limits are starting to be hit.
+
+###### Network Topology
+
+As vertical scaling mode can be applied within other topologies it doesn't
+inherently imply any change in the network topology in an of itself. However
+for the purposes of illustration we will focus on how things look when a single
+`Gateway` is used, which is effectively the "default" deployment for users. In
+this example ingress traffic passes through a single `DataPlane`, and increases
+in traffic requirements can potentially be resolved by increasing CPU/Mem.
+
+![vert-scaling-diag](https://user-images.githubusercontent.com/5332524/187459461-0cbdcd47-d36a-4735-84dc-6ace2e2c0a73.png)
+
+###### Relevant Issues:
+
+- Vertical Scaling: [#233](https://github.com/Kong/gateway-operator/issues/233)
+- Performance Testing: [#235](https://github.com/Kong/gateway-operator/issues/235)
+
+##### Horizontal DataPlane Scalability Mode
+
+Horizontal DataPlane Scalability mode implies that there will be 2 or more
+`Pods` provisioned for a `DataPlane` resource. In this mode traffic is split
+between the backend `Pods` according to the `Service` (generally, implemented
+with a `LoadBalancer` strategy and managed with a simple balancing algorithm
+such as "round-robin").
+
+With multiple `Pods` in action the Gateway Operator is responsible for
+deploying a single `ControlPlane` instance which will serve equivalent
+configuration to each of them. Regular tests need to be run to determine the
+upper bounds of this integration and verify how many `DataPlanes` a single
+`ControlPlane` can effectively serve with fast turnaround.
+
+###### User Interface
+
+The `Gateway` API must be used to employ this strategy, as the gateway
+controller will be responsible for responding to scaling requests and
+provisioning the relevant `DataPlanes`, as well as reconfiguring the
+relevant `ControlPlanes` to become connected to them and synchronized.
+
+Scaling requests in this mode will be handled using `GatewayScalingPolicy`,
+which is an implementation of a [Policy Attachment][pol] API. The policy
+includes a field in the spec for an explicit number of replicas to provision,
+as well as options for automatically scaling the `Gateway` according to
+[provided resource metrics or custom metrics][hpa]. By default all `Pods` will
+be provisioned with node anti-affinity for each other, though this will also be
+configurable through the scaling policy.
+
+###### Network Topology
+
+In this setup application traffic is load-balanced between any number of `Pods`
+all of which are opportunistically placed on separate `Nodes`. `ControlPlane`
+traffic is transmitted via the `Pod` network to the `DataPlane` from a network
+adjacent location.
+
+![horz-scaling-diag](https://user-images.githubusercontent.com/5332524/187459519-ccf132db-293f-493b-8fcc-4262ac698636.png)
+
+###### Relevant Issues
+
+- Horizontal DataPlane Scaling: [#8](https://github.com/Kong/gateway-operator/issues/8)
+- Automatic Horizontal DataPlane Scaling: [#171](https://github.com/Kong/gateway-operator/issues/171)
+- Performance Testing: [#235](https://github.com/Kong/gateway-operator/issues/235)
+
+[pol]:https://gateway-api.sigs.k8s.io/references/policy-attachment/
+[hpa]:https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+
+##### Hybrid DataPlane Scalability Mode
+
+Hybrid DataPlane Scalability Mode is similar to the above mode in that it
+provides a means to horizontally scale using `DataPlanes` but in this case the
+`ControlPlane` is missing, as the control-plane is expected to be provided
+elsewhere (in the future, we may add support for Hybrid ControlPlane deployment
+but that's not in scope for the moment).
+
+###### User Interface
+
+Unlike the above modes, this is instrumented entirely by using the `DataPlane`
+API directly, and wont be usable with `Gateway`. The caller needs to be able to
+configure both the ENV and the mounts of the `Pods` which are created for the
+`DataPlane` so as to provide the network and certificate configurations needed
+so that the underlying Kong Gateway can communicate back with the Hybrid
+control plane.
+
+###### Network Topology
+
+In this setup application traffic is load-balanced between any number of `Pods`
+all of which are opportunistically placed on separate `Nodes`. `ControlPlane`
+traffic is transmitted via webhook initialized by the `DataPlane` from a
+control plane unmanaged by the Gateway Operator, that traffic can either be
+intra-cluster OR extra cluster (across the internet, e.t.c.).
+
+![hybrid-scaling-diag](https://user-images.githubusercontent.com/5332524/187458947-83c4f5a0-4ba3-4f8f-a3da-e3aa52d081a8.png)
+
+###### Relevant Issues
+
+- Hybrid DataPlane Mode Support: [#229](https://github.com/Kong/gateway-operator/issues/229)
+
 ### Test Plan
 
 Testing for this new operator will be performed similarly to what's already
