@@ -16,6 +16,9 @@
 - Update DataPlane and ControlPlane Ready condition when underlying Deployment
   changes Ready condition
   [#451](https://github.com/Kong/gateway-operator/pull/451)
+- Update DataPlane NetworkPolicy to match KONG_PROXY_LISTEN and KONG_ADMIN_LISTEN
+  environment variables set in DataPlane
+  [#473](https://github.com/Kong/gateway-operator/pull/473)
 
 **Maturity: ALPHA**
 
