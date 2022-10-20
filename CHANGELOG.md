@@ -19,6 +19,10 @@
 - Update DataPlane NetworkPolicy to match KONG_PROXY_LISTEN and KONG_ADMIN_LISTEN
   environment variables set in DataPlane
   [#473](https://github.com/Kong/gateway-operator/pull/473)
+- Added Container image and version validation for ControlPlanes and DataPlanes.
+  The operator now only supports the Kubernetes-ingress-controller (2.7) as
+  the ControlPlane, and Kong (3.0) as the DataPlane.
+  [#490](https://github.com/Kong/gateway-operator/pull/490)
 
 **Maturity: ALPHA**
 
