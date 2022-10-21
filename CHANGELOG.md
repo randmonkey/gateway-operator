@@ -23,6 +23,9 @@
   The operator now only supports the Kubernetes-ingress-controller (2.7) as
   the ControlPlane, and Kong (3.0) as the DataPlane.
   [#490](https://github.com/Kong/gateway-operator/pull/490)
+- DataPlane resources get a new `Status` field: `Addresses` which will contain
+  backing service addresses.
+  [#483](https://github.com/Kong/gateway-operator/pull/483)
 
 **Maturity: ALPHA**
 
