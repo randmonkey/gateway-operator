@@ -11,6 +11,7 @@ assignees: ''
 
 - [ ] Check [default versions](#verify-default-hardcoded-versions) of images.
 - [ ] Check the `CHANGELOG.md` and update it with the new version number. Make sure the log is up to date.
+- [ ] Check the Kong incubator [website][kongincubator] and update it with the released documentation.
 - [ ] Check the existing [releases][releases] and determine the next version number.
 - [ ] From [GitHub release action][release-action], start a new workflow run with the `release` input set to the release tag (e.g. `v0.1.0`).
 - [ ] Wait for the workflow to complete.
@@ -153,3 +154,4 @@ Steps:
 [consts-pkg]: https://github.com/Kong/gateway-operator/blob/main/internal/consts/consts.go
 [olm-channels]: https://olm.operatorframework.io/docs/best-practices/channel-naming/
 [operator-hub-community]: https://github.com/k8s-operatorhub/community-operators
+[kongincubator]: https://incubator.konghq.com/p/gateway-operator
