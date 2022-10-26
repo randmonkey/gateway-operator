@@ -2,12 +2,15 @@
 
 ## Table of Contents
 
+- [v0.2.0](#v020)
 - [v0.1.1](#v011)
 - [v0.1.0](#v010)
 
-## Unreleased
+## v0.2.0
 
-> Release date: TBD
+> Release date: 2022-10-26
+
+**Maturity: ALPHA**
 
 ### Added
 
@@ -26,8 +29,6 @@
 - DataPlane resources get a new `Status` field: `Addresses` which will contain
   backing service addresses.
   [#483](https://github.com/Kong/gateway-operator/pull/483)
-
-**Maturity: ALPHA**
 
 ## v0.1.1
 
@@ -80,5 +81,6 @@ leftovers from previous operator deployments in the cluster. The user needs to d
 (clusterrole, clusterrolebinding, validatingWebhookConfiguration) before
 re-installing the operator through the bundle.
 
+[v0.2.0]: https://github.com/Kong/gateway-operator/tree/v0.2.0
 [v0.1.1]: https://github.com/Kong/gateway-operator/tree/v0.1.1
 [v0.1.0]: https://github.com/Kong/gateway-operator/tree/v0.1.0
