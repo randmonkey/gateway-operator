@@ -10,10 +10,18 @@
 
 > Release date: TBA
 
+### Added
+
+- Gateway statuses now include all addresses from their DataPlane Service.
+  [#535](https://github.com/Kong/gateway-operator/pull/535)
+
 ### Fixes
 
 - Regenerate DataPlane's TLS secret upon deletion
   [#500](https://github.com/Kong/gateway-operator/pull/500)
+- Gateway statuses no longer list cluster IPs if their DataPlane Service is a
+  LoadBalancer.
+  [#535](https://github.com/Kong/gateway-operator/pull/535)
 
 ## v0.2.0
 
