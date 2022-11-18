@@ -14,6 +14,8 @@
 
 - Gateway statuses now include all addresses from their DataPlane Service.
   [#535](https://github.com/Kong/gateway-operator/pull/535)
+- Dataplane Deployment strategy enforced as RollingUpdate.
+  [#537](https://github.com/Kong/gateway-operator/pull/537)
 
 ### Fixes
 
