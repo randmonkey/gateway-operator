@@ -10,6 +10,11 @@
 
 > Release date: TBA
 
+### Changed
+
+- Bumped DataPlane default image to 3.0.1
+  [#561](https://github.com/Kong/gateway-operator/pull/561)
+
 ### Added
 
 - Gateway statuses now include all addresses from their DataPlane Service.
