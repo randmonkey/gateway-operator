@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [v0.3.0](#v030)
 - [v0.2.0](#v020)
 - [v0.1.1](#v011)
 - [v0.1.0](#v010)
@@ -9,6 +10,12 @@
 ## Unreleased
 
 > Release date: TBA
+
+## v0.3.0
+
+> Release date: 2022-11-30
+
+**Maturity: ALPHA**
 
 ### Changed
 
