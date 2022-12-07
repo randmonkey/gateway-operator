@@ -15,6 +15,18 @@ A [Kubernetes Operator][k8soperator] for the [Kong Gateway][kong].
 [k8soperator]:https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
 [kong]:https://konghq.com
 
+### Features
+
+The following features are considered currently planned or supported:
+
+- Gateway Deployment & Teardown
+- Gateway Configuration Management
+- Gateway Upgrades & Downgrades
+- Gateway Horizontal Scaling
+- Hybrid DataPlane Mode Attachment
+
+See our [Features Page](/FEATURES.md) for details on these capabilities.
+
 ### Deployment
 
 Prior to deployment, Kong and [Gateway API][gwapi] CRDs need to be deployed:
