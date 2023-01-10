@@ -11,6 +11,12 @@
 
 > Release date: TBA
 
+### Added
+
+- Added machinery for ControlPlanes to communicate with DataPlanes
+  directly via Pod IPs. The Admin API has been removed from the LoadBalancer service.
+  [#609](https://github.com/Kong/gateway-operator/pull/609)
+
 ## v0.3.0
 
 > Release date: 2022-11-30
