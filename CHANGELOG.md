@@ -16,6 +16,8 @@
 - Added machinery for ControlPlanes to communicate with DataPlanes
   directly via Pod IPs. The Admin API has been removed from the LoadBalancer service.
   [#609](https://github.com/Kong/gateway-operator/pull/609)
+- The Gateway Listeners status is set and kept up to date by the Gateway controller.
+  [#627](https://github.com/Kong/gateway-operator/pull/627)
 
 ## v0.3.0
 
