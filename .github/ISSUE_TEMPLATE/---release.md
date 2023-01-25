@@ -13,13 +13,14 @@ This release pipeline is under continous improvement. If you encounter any probl
 
 - [ ] Check [default versions](#verify-default-hardcoded-versions) of images (see below).
 - [ ] Check the `CHANGELOG.md` and update it with the new version number. Make sure the log is up to date.
-- [ ] Check the Kong incubator [website][kongincubator] and update it with the released documentation.
+- [ ] Check the Kong incubator [website][kongincubator] ([KGO page source][kongincubator-kgo-project]) and update it with the released documentation.
 - [ ] Check the existing [releases][releases] and determine the next version number.
 - [ ] From [GitHub release action][release-action], start a new workflow run with the `release` input set to the release tag (e.g. `v0.1.0`).
 - [ ] Wait for the workflow to complete.
-- [ ] Submit the operator to [external hubs](#submit-to-external-hubs) (see below).
-- [ ] The CI should create a PR in the Gateway Operator repo that syncs the release branch to the `main` branch. Merge it.
+- [ ] Ensure CI created a [KGO docs][kgo-docs-prs] PR. Review and merge it. 
+- [ ] The CI should create a PR in the [Gateway Operator][kgo-prs] repo that syncs the release branch to the `main` branch. Merge it.
 - [ ] After the PR is merged, a new release should be created automatically. Check the [releases][releases] page.
+- [ ] Submit the operator to [external hubs](#submit-to-external-hubs) (see below).
 
 ## Verify default hardcoded versions
 
@@ -40,6 +41,8 @@ The Redhat Certified Operators bundles has a env vars file that needs to be upda
 - `RELATED_IMAGE_KONG_CONTROLLER` - the Kong control plane image.
 - `RELATED_IMAGE_CERTIFICATE_CONFIG` - the image used to generate the webhook certificates.
 
+When the changes of the above versions are ready, make sure you run `make generate manifests bundle.regular bundle.redhat-certified`.
+
 ## Submit to external hubs
 
 - [ ] Submit the operator to the [OperatorHub](#operatorhub-community-operators-steps) and wait for it to be published (follow instruction below).
@@ -56,10 +59,11 @@ The Redhat Certified Operators bundles has a env vars file that needs to be upda
 Please refer to the [Operator Certification Guide][operator-certification-pipeline] for more information.
 
 - [ ] The CI should create a new branch in [the redhat certified operators repository fork][certified-operators-fork] named `kong-gateway-operator-<version>`.
-- [ ] Verify that the [the redhat certified operators repository fork][certified-operators-fork] has the new branch and generated bundle is present in subdirectory `operators/kong-gateway-operator/<version>`. The CI should create a PR on the upstream repository; check it out.
+- [ ] Verify that the [the redhat certified operators repository fork][certified-operators-fork] has the new branch and generated bundle is present in subdirectory `operators/kong-gateway-operator/<version>`.
 - [ ] Start a tekton pipeline on the OpenShift cluster to test the operator, to do so, use the following procedure:
+- [ ] The tekton pipeline should create a PR on the upstream repository. [Check it out][cert-operators-prs].
 
-  1. Use the kubeconfig you find in [1Password][openshift-kubeconfig]
+  1. Use the kubeconfig (`schmetterling.teamk8s.com`) you find in [1Password][openshift-kubeconfig]
 
   1. Create a `workspace-template.yaml` file as follows:
 
@@ -164,6 +168,10 @@ In the past happened that the Tekton pipeline failed because the Pyxis token was
 [olm-channels]: https://olm.operatorframework.io/docs/best-practices/channel-naming/
 [operator-hub-community]: https://github.com/k8s-operatorhub/community-operators
 [kongincubator]: https://incubator.konghq.com/p/gateway-operator
+[kongincubator-kgo-project]: https://github.com/Kong/kong-incubator/blob/main/src/_projects/gateway-operator.md
 [openshift-kubeconfig]: https://start.1password.com/open/i?a=KJVYOL2OTVGRPAAAHEVOL6MXZE&v=q7r4hh4465zentymwtoonxxp3m&i=xx4qrq3gretylyvt6bg5ywp6l4&h=team-kong.1password.com
 [pyxis-token-creation]: https://github.com/redhat-openshift-ecosystem/certification-releases/blob/main/4.9/ga/operator-cert-workflow.md#step-b---get-api-key
 [pyxis-kubernetes-secret-creation]: https://github.com/redhat-openshift-ecosystem/certification-releases/blob/main/4.9/ga/ci-pipeline.md#add-red-hat-container-api-access-key
+[kgo-docs-prs]: https://github.com/Kong/gateway-operator-docs/pulls
+[kgo-prs]: https://github.com/Kong/gateway-operator/pulls
+[cert-operators-prs]: https://github.com/redhat-openshift-ecosystem/certified-operators/pulls
