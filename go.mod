@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/kong/kubernetes-telemetry v0.0.0-20220823141552-fa3a962bd6e1
-	github.com/kong/kubernetes-testing-framework v0.28.0
+	github.com/kong/kubernetes-testing-framework v0.28.1
 	github.com/stretchr/testify v1.8.1
 	k8s.io/api v0.26.1
 	k8s.io/apimachinery v0.26.1

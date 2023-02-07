@@ -587,8 +587,8 @@ github.com/kisielk/sqlstruct v0.0.0-20201105191214-5f3e10d3ab46/go.mod h1:yyMNCy
 github.com/kisom/goutils v1.4.3/go.mod h1:Lp5qrquG7yhYnWzZCI/68Pa/GpFynw//od6EkGnWpac=
 github.com/kong/kubernetes-telemetry v0.0.0-20220823141552-fa3a962bd6e1 h1:C9qF+1WdmzXJq9KvUpyITPVxXCJw+pXGGLJG9/o+aqk=
 github.com/kong/kubernetes-telemetry v0.0.0-20220823141552-fa3a962bd6e1/go.mod h1:ey6GZzf61cwAsg6DMYgP8QWD6oVk7J/ereNs2RazxQ0=
-github.com/kong/kubernetes-testing-framework v0.28.0 h1:6/NeKcsfeOc+uhAQcNuEgXn9w0QsUziD8Udp11IIMAI=
-github.com/kong/kubernetes-testing-framework v0.28.0/go.mod h1:GTh/IvYaLr6IEldoUilDu4qL1vTjIYAdu90L/08vgrE=
+github.com/kong/kubernetes-testing-framework v0.28.1 h1:mrKetN0rzoGQ3UIxZKfFcaXZXi8sO4PGHNs2N89h/Jo=
+github.com/kong/kubernetes-testing-framework v0.28.1/go.mod h1:pR62BdmFDG/zLRoSG+JYuQtHnd03KKG19QsHOb3UnKU=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/fs v0.1.0/go.mod h1:FFnZGqtBN9Gxj7eW1uZ42v5BccTP0vu6NEaFoC2HwRg=
