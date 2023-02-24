@@ -8,7 +8,7 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/kong/kubernetes-telemetry v0.0.0-20220823141552-fa3a962bd6e1
+	github.com/kong/kubernetes-telemetry v0.0.1
 	github.com/kong/kubernetes-testing-framework v0.29.0
 	github.com/stretchr/testify v1.8.1
 	k8s.io/api v0.26.1
@@ -28,7 +28,7 @@ require (
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/benbjohnson/clock v1.1.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
-	github.com/bombsimon/logrusr/v3 v3.0.0 // indirect
+	github.com/bombsimon/logrusr/v3 v3.1.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cloudflare/circl v1.1.0 // indirect
@@ -76,7 +76,7 @@ require (
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pjbgf/sha1cd v0.2.3 // indirect
-	github.com/puzpuzpuz/xsync v1.4.3 // indirect
+	github.com/puzpuzpuz/xsync/v2 v2.4.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/samber/lo v1.37.0 // indirect
