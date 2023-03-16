@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/go-delve/delve v1.20.1
 	github.com/golangci/golangci-lint v1.51.1
-	github.com/operator-framework/operator-registry v1.26.3
+	github.com/operator-framework/operator-registry v1.26.4
 	gotest.tools/gotestsum v1.9.0
 	k8s.io/code-generator v0.26.1
 	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20220715194349-88234a8fc9ad
