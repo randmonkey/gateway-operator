@@ -8,7 +8,15 @@
 - [v0.1.1](#v011)
 - [v0.1.0](#v010)
 
-## v0.4.0 
+## Unreleased
+
+### Fixes
+
+- Fix admission webhook certificates Job which caused TLS handshake errors when
+  webhook was being called.
+  [#716](https://github.com/Kong/gateway-operator/pull/716)
+
+## v0.4.0
 
 > Release date: 2022-01-25
 
