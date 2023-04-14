@@ -10,6 +10,11 @@
 
 ## Unreleased
 
+### Changed
+
+- Bumped default ControlPlane image to 2.9.2
+  [#719](https://github.com/Kong/gateway-operator/pull/719)
+
 ### Fixes
 
 - Fix admission webhook certificates Job which caused TLS handshake errors when
