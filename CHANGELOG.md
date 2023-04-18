@@ -14,6 +14,9 @@
 
 - Bumped default ControlPlane image to 2.9.2
   [#719](https://github.com/Kong/gateway-operator/pull/719)
+- Controlplane and Dataplane specs have beeen refactored by explicitly setting 
+  the deployment field (instead of having it inline).
+  [#725](https://github.com/Kong/gateway-operator/pull/725)
 
 ### Fixes
 
