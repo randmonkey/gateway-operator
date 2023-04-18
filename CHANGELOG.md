@@ -18,6 +18,12 @@
   the deployment field (instead of having it inline).
   [#725](https://github.com/Kong/gateway-operator/pull/725)
 
+### Added
+
+- Added possibility to specify resources through `DataPlane` and `ControlPlane`
+  `spec.deployment.resources`
+  [#712](https://github.com/Kong/gateway-operator/pull/712)
+
 ### Fixes
 
 - Fix admission webhook certificates Job which caused TLS handshake errors when
