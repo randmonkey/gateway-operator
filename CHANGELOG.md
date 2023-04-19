@@ -26,6 +26,10 @@
 - Added possibility to specify resources through `DataPlane` and `ControlPlane`
   `spec.deployment.resources`
   [#712](https://github.com/Kong/gateway-operator/pull/712)
+- The `DataPlane` spec has been updated with a new field related
+  to the proxy service. By using such a field, it is possible to
+  specify annotations to be set on the `DataPlane` proxy service.
+  [#682](https://github.com/Kong/gateway-operator/pull/682)
 
 ### Fixes
 
