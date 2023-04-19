@@ -35,7 +35,7 @@ Also, the Makefile contains hardcoded information that needs to be updated:
 - `CHANNELS` - the channels the operator is available on the OpenShift Operator Hub. For the technical preview we're using `alpha` channels. Please refer to the [OLM docs][olm-channels] for more information.
 - `OPENSHIFT_SUPPORTED_VERSIONS` - the supported versions of OpenShift.
 
-When the changes of the above versions are ready, make sure you run `make generate manifests bundle.regular`.
+When the changes of the above versions are ready, make sure you run `make generate manifests bundle`.
 
 ## Submit to external hubs
 
