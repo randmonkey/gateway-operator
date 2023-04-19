@@ -12,9 +12,12 @@
 
 ### Changed
 
-- Bumped default ControlPlane image to 2.9.2
+- Bumped default ControlPlane image to 2.9.3
+  [#712](https://github.com/Kong/gateway-operator/pull/712)
   [#719](https://github.com/Kong/gateway-operator/pull/719)
-- Controlplane and Dataplane specs have beeen refactored by explicitly setting 
+- Bumped default DataPlane image to 3.2.2
+  [#728](https://github.com/Kong/gateway-operator/pull/728)
+- Controlplane and Dataplane specs have beeen refactored by explicitly setting
   the deployment field (instead of having it inline).
   [#725](https://github.com/Kong/gateway-operator/pull/725)
 
