@@ -17,7 +17,10 @@
   [#719](https://github.com/Kong/gateway-operator/pull/719)
 - Bumped default DataPlane image to 3.2.2
   [#728](https://github.com/Kong/gateway-operator/pull/728)
-- Controlplane and Dataplane specs have beeen refactored by explicitly setting
+- Bumped Gateway API to 0.6.1. Along with it, the deprecated `Gateway`
+  `scheduled` condition has been replaced by the `accepted` condition.
+  [#618](https://github.com/Kong/gateway-operator/issues/618)
+- `ControlPlane` and `DataPlane` specs have been refactored by explicitly setting
   the deployment field (instead of having it inline).
   [#725](https://github.com/Kong/gateway-operator/pull/725)
 
