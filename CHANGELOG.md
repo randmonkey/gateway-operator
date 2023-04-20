@@ -30,6 +30,8 @@
   This allows users to define `DataPlane`s - without `ControlPlane` - to be
   horizontally scalable.
   [#737](https://github.com/Kong/gateway-operator/pull/737)
+- Added possibility to specify `DataPlane` proxy service type
+  [#739](https://github.com/Kong/gateway-operator/pull/739)
 - Added possibility to specify resources through `DataPlane` and `ControlPlane`
   `spec.deployment.resources`
   [#712](https://github.com/Kong/gateway-operator/pull/712)
