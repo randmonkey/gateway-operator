@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [v0.5.0](#v050)
 - [v0.4.0](#v040)
 - [v0.3.0](#v030)
 - [v0.2.0](#v020)
@@ -9,6 +10,14 @@
 - [v0.1.0](#v010)
 
 ## Unreleased
+
+### Added 
+
+- Added `Volumes` and `VolumeMounts` field in `DeploymentOptions` of `DataPlane`
+  specs. Users can attach custom volumes and mount the volumes to proxy container
+  of pods in `Deployments` of dataplanes.
+  Note: `Volumes` and `VolumeMounts` are not supported for `ControlPlane` specs now.
+  [#681](https://github.com/Kong/gateway-operator/pull/681)
 
 ### Changed
 
