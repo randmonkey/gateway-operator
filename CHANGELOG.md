@@ -11,13 +11,26 @@
 
 ## Unreleased
 
-### Added 
+### Added
 
 - Added `Volumes` and `VolumeMounts` field in `DeploymentOptions` of `DataPlane`
   specs. Users can attach custom volumes and mount the volumes to proxy container
   of pods in `Deployments` of dataplanes.
   Note: `Volumes` and `VolumeMounts` are not supported for `ControlPlane` specs now.
   [#681](https://github.com/Kong/gateway-operator/pull/681)
+- Added possibility to replicas on `DataPlane` deployments
+  This allows users to define `DataPlane`s - without `ControlPlane` - to be
+  horizontally scalable.
+  [#737](https://github.com/Kong/gateway-operator/pull/737)
+- Added possibility to specify `DataPlane` proxy service type
+  [#739](https://github.com/Kong/gateway-operator/pull/739)
+- Added possibility to specify resources through `DataPlane` and `ControlPlane`
+  `spec.deployment.resources`
+  [#712](https://github.com/Kong/gateway-operator/pull/712)
+- The `DataPlane` spec has been updated with a new field related
+  to the proxy service. By using such a field, it is possible to
+  specify annotations to be set on the `DataPlane` proxy service.
+  [#682](https://github.com/Kong/gateway-operator/pull/682)
 
 ### Changed
 
@@ -33,27 +46,14 @@
   the deployment field (instead of having it inline).
   [#725](https://github.com/Kong/gateway-operator/pull/725)
 
-### Added
-
-- Added possibility to replicas on `DataPlane` deployments
-  This allows users to define `DataPlane`s - without `ControlPlane` - to be
-  horizontally scalable.
-  [#737](https://github.com/Kong/gateway-operator/pull/737)
-- Added possibility to specify `DataPlane` proxy service type
-  [#739](https://github.com/Kong/gateway-operator/pull/739)
-- Added possibility to specify resources through `DataPlane` and `ControlPlane`
-  `spec.deployment.resources`
-  [#712](https://github.com/Kong/gateway-operator/pull/712)
-- The `DataPlane` spec has been updated with a new field related
-  to the proxy service. By using such a field, it is possible to
-  specify annotations to be set on the `DataPlane` proxy service.
-  [#682](https://github.com/Kong/gateway-operator/pull/682)
-
 ### Fixes
 
 - Fix admission webhook certificates Job which caused TLS handshake errors when
   webhook was being called.
   [#716](https://github.com/Kong/gateway-operator/pull/716)
+- Include leader election related role when generating `ControlPlane` RBAC
+  manifests so that Gateway Discovery can be used by KIC.
+  [#743](https://github.com/Kong/gateway-operator/pull/743)
 
 ## v0.4.0
 
