@@ -13,6 +13,9 @@
 
 ### Added
 
+- Moved pod related options in `DeploymentOptions` to `PodsOptions` and added pod
+  labels option.
+  [#742](https://github.com/Kong/gateway-operator/pull/742)
 - Added `Volumes` and `VolumeMounts` field in `DeploymentOptions` of `DataPlane`
   specs. Users can attach custom volumes and mount the volumes to proxy container
   of pods in `Deployments` of dataplanes.
