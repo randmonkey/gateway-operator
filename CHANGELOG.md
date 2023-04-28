@@ -13,6 +13,9 @@
 
 ### Added
 
+- Add Kong Gateway enterprise image - `kong/kong-gateway` - to the set of supported
+  `DataPlane` images.
+  [#749](https://github.com/Kong/gateway-operator/pull/749)
 - Moved pod related options in `DeploymentOptions` to `PodsOptions` and added pod
   labels option.
   [#742](https://github.com/Kong/gateway-operator/pull/742)
