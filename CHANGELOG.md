@@ -51,6 +51,10 @@
 - `ControlPlane` and `DataPlane` specs have been refactored by explicitly setting
   the deployment field (instead of having it inline).
   [#725](https://github.com/Kong/gateway-operator/pull/725)
+- `ControlPlane` and `DataPlane` specs now require users to provide `containerImage`
+  and `version` fields.
+  This is being enforced in the admission webhook.
+  [#758](https://github.com/Kong/gateway-operator/pull/758)
 
 ### Fixes
 
