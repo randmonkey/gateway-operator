@@ -13,6 +13,8 @@
 
 ### Added
 
+- Added `AddressSourceType` to `DataPlane` status `Address`
+  [#798](https://github.com/Kong/gateway-operator/pull/798)
 - Add pod Affinity field to `PodOptions` and support for both `DataPlane` and `ControlPlane`
 - Add Kong Gateway enterprise image - `kong/kong-gateway` - to the set of supported
   `DataPlane` images.
