@@ -15,17 +15,44 @@ A [Kubernetes Operator][k8soperator] for the [Kong Gateway][kong].
 [k8soperator]:https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
 [kong]:https://konghq.com
 
-### Features
+### Current Features
 
-The following features are considered currently planned or supported:
+The following features are considered supported:
 
-- Gateway Deployment & Teardown
-- Gateway Configuration Management
-- Gateway Upgrades & Downgrades
-- Gateway Horizontal Scaling
-- Hybrid DataPlane Mode Attachment
+- Creation of [Kong Gateways][konggw] using the `DataPlane` API
+- Hybrid Mode Attachment using the `DataPlane` API
 
 See our [Features Page](/FEATURES.md) for details on these capabilities.
+
+[konggw]:https://github.com/kong/kong
+
+#### Upcoming Features
+
+The following are some of the additional features we're either experimenting
+with or providing as a technical preview for feedback.
+
+##### ControlPlane API
+
+> **Status**: Technical Preview
+
+We currently provide a `ControlPlane` API resource which can be used to enable
+things like `Ingress` support for the `DataPlane`. The current underlying
+implementation of this we're providing uses the [Kong Kubernetes Ingress
+Controller (KIC)][kic] as the `ControlPlane`.
+
+[kic]:https://github.com/kong/kubernetes-ingress-controller
+
+##### Gateway API Support
+
+> **Status**: Technical Preview
+
+We're adding support for [Gateway API][gwapi]. At a high level we consider a
+`Gateway` to be a composition of both a `ControlPlane` and a `DataPlane` for
+that `Gateway`, where configuration management for these resources is handled
+by the operator (e.g. the operator automatically manages certificates,
+upgrades, scaling, e.t.c.).
+
+[gwapi]:https://github.com/kubernetes-sigs/gateway-api
 
 ### Deployment
 
