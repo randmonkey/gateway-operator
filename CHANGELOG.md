@@ -58,6 +58,13 @@
   and `version` fields.
   This is being enforced in the admission webhook.
   [#758](https://github.com/Kong/gateway-operator/pull/758)
+- Validation for `ControlPlane` and `DataPlane` components no longer has a
+  "ceiling", or maximum version. This due to popular demand, but now puts more
+  emphasis on the user to troubleshoot when things go wrong. It's no longer
+  possible to use a tag that's not semver compatible (e.g. 2.10.0) for these
+  components (for instance, a branch such as `main`) without enabling developer
+  mode.
+  [#819](https://github.com/Kong/gateway-operator/pull/819)
 
 ### Fixes
 
