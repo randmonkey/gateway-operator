@@ -9,7 +9,9 @@
 - [v0.1.1](#v011)
 - [v0.1.0](#v010)
 
-## Unreleased
+## v0.5.0
+
+> Release date: 2023-06-15
 
 ### Added
 
