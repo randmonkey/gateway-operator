@@ -11,9 +11,9 @@ assignees: ''
 
 This release pipeline is under continous improvement. If you encounter any problem, please refer to the [troubleshooting](#troubleshooting) section of this document. If the troubleshooting section does not contain the answer to the problem you encountered, please create an issue to improve either the pipeline (if the problem is a bug), or this document (if the problem is caused by human error).
 
+- [ ] Check the existing [releases][releases] and determine the next version number.
 - [ ] Check [default versions](#verify-default-hardcoded-versions) of images (see below).
 - [ ] Check the `CHANGELOG.md` and update it with the new version number. Make sure the log is up to date.
-- [ ] Check the existing [releases][releases] and determine the next version number.
 - [ ] From [GitHub release action][release-action], start a new workflow run with the `release` input set to the release tag (e.g. `v0.1.0`).
 - [ ] Wait for the workflow to complete.
 - [ ] Ensure CI created a [KGO docs][kgo-docs-prs] PR. Review and merge it. 
