@@ -65,6 +65,9 @@
   components (for instance, a branch such as `main`) without enabling developer
   mode.
   [#819](https://github.com/Kong/gateway-operator/pull/819)
+- `ControlPlane` and `DataPlane` image validation now supports enterprise image
+  flavours, e.g. `3.3.0-ubuntu`, `3.2.0.0-rhel` etc.
+  [#830](https://github.com/Kong/gateway-operator/pull/830)
 
 ### Fixes
 
