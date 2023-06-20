@@ -11,7 +11,7 @@
 
 ## v0.5.0
 
-> Release date: 2023-06-15
+> Release date: 2023-06-20
 
 ### Added
 
