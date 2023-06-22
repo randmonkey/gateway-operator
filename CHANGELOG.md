@@ -9,6 +9,20 @@
 - [v0.1.1](#v011)
 - [v0.1.0](#v010)
 
+## Unreleased
+
+> Release date: TBD
+
+### Changes
+
+> **WARN**: Breaking changes included
+
+- Renamed `Services` options in `DataPlaneOptions` to `Network` options, which
+  now includes `IngressService` as one of the sub-attributes.
+  This is a **breaking change** which requires some renaming and reworking of
+  struct attribute access.
+  [#849](https://github.com/Kong/gateway-operator/pull/849)
+
 ## v0.5.0
 
 > Release date: 2023-06-20
