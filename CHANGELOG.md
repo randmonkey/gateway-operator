@@ -22,6 +22,8 @@
   This is a **breaking change** which requires some renaming and reworking of
   struct attribute access.
   [#849](https://github.com/Kong/gateway-operator/pull/849)
+- Bump Gateway API to v0.6.2 and enable Gateway API conformance testing.
+  [#853](https://github.com/Kong/gateway-operator/pull/853)
 
 ## v0.5.0
 
