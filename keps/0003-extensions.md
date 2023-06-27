@@ -1,6 +1,6 @@
 ---
 title: API Extensions
-status: provisional
+status: implementable
 ---
 
 # API Extensions
@@ -44,9 +44,12 @@ behavior.
 
 ### Design
 
-TODO: there's some content here that will need to be expanded, but this
-feels like a good place to stop and check in with other contributors to make
-sure the premise so far sounds good.
+The overarching design for the extensions mechanism is founded on adding
+extension fields to KGO's APIs and enabling extension developers to provide
+replacement logic for the controllers for those APIs.
+
+In the following sub-sections we will go into details about how the extensions
+are meant to be implemented.
 
 #### Extensions Specification
 
@@ -63,12 +66,12 @@ type DataPlaneSpec struct {
 	// resources to influence or enhance functionality.
 	//
 	// +optional
-	Extensions []Extension `json:"extensions"`
+	Extensions []ExtensionRef `json:"extensions"`
 }
 
-// Extension corresponds to another resource in the Kubernetes cluster which
+// ExtensionRef corresponds to another resource in the Kubernetes cluster which
 // defines extended behavior for a resource (e.g. DataPlane).
-type Extension struct {
+type ExtensionRef struct {
 	// Group is the group of the extension resource.
 	Group Group `json:"group"`
 
@@ -109,12 +112,49 @@ reconciliation logic. The standard controllers will include watch predicates
 which identify controllers providing the extension and will disable themselves
 to hand-off responsibility to the extension controllers.
 
+Replacement is up to the extension provider: watch predicates will be in place
+that can be used to disable the standard controllers for a resource (e.g. for
+`DataPlane`) and the extension provider can then load their own controller(s)
+to replace that logic, with all of the standard logic being available to them
+"off the shelf" via a standard library. Extensions can potentially replace a
+single controller with one extension controller, or many.
+
 > **Note**: a "replacement strategy" for controllers is the only mechanism
-> we'll provide for now as it provides simplicitly.
->
-> In the future we may consider other explicit "replacement strategies", e.g.:
->
->  * "hook" style attachment points
+> we'll provide for now, though others were considered. See the [alternatives
+> considered](#alternatives-considered) section for more details.
+
+##### Loaded Extensions & Status
+
+Any resource that implements extensions **MUST** implement our standard status
+field:
+
+```golang
+type ExtensionStatus struct {
+    Loaded []ExtentionRef
+}
+```
+
+The `Loaded` field indicates to any controller that would act on the resource
+that extensions were previously loaded by the resources referenced in the
+field.
+
+> **Note**: the standard implementation will refuse to operate on any resource
+> which has extensions loaded on it, even if they've been removed in the
+> specification. To migrate back to standard from an extended implementation,
+> the standard implementation expects the extensions to be "drained" and the
+> status to show an empty `Loaded` list.
+
+##### Migrations
+
+Extension implementations **MUST** provide and document a mechanism to migrate
+back to the standard KGO implementation for resources such as `DataPlane`. For
+some implementations this may be as simple as draining the extensions (e.g.
+remove them from the spec, and wait for the status to show no more `Loaded`
+extensions).
+
+> **Note**: Extension implementations are responsible for providing testing
+> to ensure that migrating back to the standard implementation works properly
+> and maintain integrity when control is transferred back to standard mode.
 
 #### Extension Conflicts
 
@@ -157,16 +197,62 @@ to during their development:
 
 ### Test Plan
 
-TODO
+For any resource which will have extension points made available (e.g.
+`DataPlane`, `ControlPlane`) an example extension will be provided that
+provides some modified behavior.
+
+Integration tests in `test/integration` will be responsible for exercising
+these example extensions with the following high level testing plan:
+
+- verify running the controller manager _without_ the extension controller
+  loaded
+- verify creating several resources (e.g. `DataPlane`) with the standard
+  implementation
+- re-deploy the controller manager with the example extensions enabled
+- verify that the existing resources with no extensions on them continue to
+  exhibit appropriate behavior
+- verify attaching extensions to some of the test resources
+- verify that resources with extensions exhibit extended behavior
+- verify that resources with no extensions continue to exhibit standard behavior
+
+This testing will help us to reduce the risk of breakage or regressions in
+future releases.
 
 ### Graduation Criteria
 
-TODO
+- [ ] extension points are added to `DataPlane`.
+- [ ] extension points are added to `ControlPlane`.
+- [ ] extension predicates are added to relevant controllers to filter out
+      resources with extensions attached via specification, or loaded in the
+      resource status.
+- [ ] example extensions are created for `DataPlane`
+- [ ] example extensions are created for `ControlPlane`
+- [ ] integration tests are added for the example extensions
 
 ## Production Readiness
 
-TODO
+Production readiness for this feature will be marked by a combination of the
+above graduation criteria being entirely resolved _and_ there being at least
+one extension implementation actively maintained and in use for a period of
+several months (likely this will be done within Kong itself, though the door
+technically remains open for other downstream implementations).
 
 ## Alternatives
 
-TODO
+Some alternative mechanisms for extensions were considered by the KGO
+maintainers, but ultimately were rejected:
+
+### Controller Hooks
+
+In brainstorming among contributors our first concept for enabling extensions
+was hook points where extension logic would be loaded into the standard
+controllers directly. This had both maintenance and composability problems
+compared to the "replacement with libraries" strategy. For our immediate goals
+and motivations this was not optimal, and there are no plans to revisit this
+unless some future requirements arise that make it necessary.
+
+### Forking
+
+We could have suggested maintaining a fork as the "mechanism" by which
+extended versions of the KGO could be developed, but this filled all of us with
+rage and tears and so we noped out pretty hard on this one.
