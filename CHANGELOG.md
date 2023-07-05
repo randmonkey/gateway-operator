@@ -13,6 +13,11 @@
 
 > Release date: TBD
 
+### Added
+
+- Added `Ready`, `ReadyReplicas` and `Replicas` fields to `DataPlane`'s Status
+  [#854](https://github.com/Kong/gateway-operator/pull/854)
+
 ### Changes
 
 > **WARN**: Breaking changes included
