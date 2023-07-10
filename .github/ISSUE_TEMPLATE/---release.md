@@ -14,6 +14,7 @@ This release pipeline is under continous improvement. If you encounter any probl
 - [ ] Check the existing [releases][releases] and determine the next version number.
 - [ ] Check [default versions](#verify-default-hardcoded-versions) of images (see below).
 - [ ] Check the `CHANGELOG.md` and update it with the new version number. Make sure the log is up to date.
+- [ ] Ensure that all generators have run properly (e.g. `make generate`) so that updates to things like CRDs are handled for the release, double check that all manifests from `config/samples/` still work as intended.
 - [ ] From [GitHub release action][release-action], start a new workflow run with the `release` input set to the release tag (e.g. `v0.1.0`).
 - [ ] Wait for the workflow to complete.
 - [ ] Ensure CI created a [KGO docs][kgo-docs-prs] PR. Review and merge it. 
