@@ -59,14 +59,14 @@ upgrades, scaling, e.t.c.).
 Prior to deployment, Kong and [Gateway API][gwapi] CRDs need to be deployed:
 
 ```console
-kubectl kustomize https://github.com/Kong/kubernetes-ingress-controller/config/crd | kubectl apply -f -
-kubectl kustomize https://github.com/kubernetes-sigs/gateway-api/config/crd?ref=v0.6.1 | kubectl apply -f -
+kubectl apply -k https://github.com/Kong/kubernetes-ingress-controller/config/crd
+kubectl apply -k https://github.com/kubernetes-sigs/gateway-api/config/crd?ref=v0.6.2
 ```
 
 Deploy the operator with the following one-liner:
 
 ```console
-kubectl kustomize https://github.com/kong/gateway-operator/config/default?submodules=false | kubectl apply -f -
+kubectl apply -k https://github.com/kong/gateway-operator/config/default?submodules=false
 ```
 
 Optionally, you can wait for the operator with:
@@ -164,18 +164,22 @@ metadata:
   name: kong
   namespace: default
 spec:
-  dataPlaneDeploymentOptions:
-    containerImage: kong/kubernetes-ingress-controller
-    version: 2.4.2
-    env:
-    - name: TEST_VAR
-      value: TEST_VAL
-  controlPlaneDeploymentOptions:
-    containerImage: kong/kong
-    version: 2.8.0
-    env:
-    - name: TEST_VAR
-      value: TEST_VAL
+  dataPlaneOptions:
+    deployment:
+      pods:
+        containerImage: kong/kong
+        version: "3.3"
+        env:
+        - name: TEST_VAR
+          value: TEST_VAL
+  controlPlaneOptions:
+    deployment:
+      pods:
+        containerImage: kong/kubernetes-ingress-controller
+        version: "2.10.2"
+        env:
+        - name: TEST_VAR
+          value: TEST_VAL
 ```
 
 Configurations like the above can be created on the API but wont be active
@@ -216,18 +220,22 @@ metadata:
   name: kong
   namespace: default
 spec:
-  dataPlaneDeploymentOptions:
-    containerImage: kong/kong
-    version: 2.7.0
-  controlPlaneDeploymentOptions:
-    containerImage: kong/kubernetes-ingress-controller
-    version: 2.4.2
+  dataPlaneOptions:
+    deployment:
+      pods:
+        containerImage: kong
+        version: "3.2"
+  controlPlaneOptions:
+    deployment:
+      pods:
+        containerImage: kong/kubernetes-ingress-controller
+        version: "2.9.3"
 ```
 
 The above configuration will deploy all `DataPlane` resources connected to the
-`GatewayConfiguration` (by way of `GatewayClass`) using `kong/kong:2.7.0` and
+`GatewayConfiguration` (by way of `GatewayClass`) using `kong:3.2` and
 any `ControlPlane` will be deployed with
-`kong/kubernetes-ingress-controller:2.4.2`.
+`kong/kubernetes-ingress-controller:2.9.3`.
 
 Given the above a manual upgrade or downgrade can be performed simply by
 changing the version. For example: assuming that at least one `Gateway` is
@@ -238,7 +246,7 @@ upgrade could be performed by running the following:
 kubectl edit gatewayconfiguration kong
 ```
 
-And updating the `dataPlaneDeploymentOptions.version` to `2.8.0`. The result
+And updating the `dataPlaneDeploymentOptions.version` to `2.10.0`. The result
 will be a replacement `Pod` will roll out with the new version and once healthy
 the old `Pod` will be terminated.
 
@@ -252,7 +260,7 @@ You can use Kong enterprise as the dataplane by doing as follows:
     kubectl create secret generic kong-enterprise-license --from-file=license=<license-file> -n <your-namespace>
     ```
 
-2. Create a `GatewayConfiguration` specifying the enterprise container image and the environment variable referencing the license secret. The operator will use the image and the environment variable specified in the `GatewayConfiguration` to customize the dataplane. As the result, the dataplane will use `kong/kong-gateway:2.8` as the image and mount the license secret.
+2. Create a `GatewayConfiguration` specifying the enterprise container image and the environment variable referencing the license secret. The operator will use the image and the environment variable specified in the `GatewayConfiguration` to customize the dataplane. As the result, the dataplane will use `kong/kong-gateway:3.3` as the image and mount the license secret.
 
     ```yaml
     kind: GatewayConfiguration
@@ -261,14 +269,17 @@ You can use Kong enterprise as the dataplane by doing as follows:
       name: kong
       namespace: <your-namespace>
     spec:
-      dataPlaneDeploymentOptions:
-        containerImage: kong/kong-gateway:2.8
-        env:
-        - name: KONG_LICENSE_DATA
-          valueFrom:
-            secretKeyRef:
-              key: license
-              name: kong-enterprise-license
+      dataPlaneOptions:
+        deployment:
+          pods:
+            containerImage: kong/kong-gateway
+            version: "3.3"
+            env:
+            - name: KONG_LICENSE_DATA
+              valueFrom:
+                secretKeyRef:
+                  key: license
+                  name: kong-enterprise-license
     ```
 
 3. Create a `GatewayClass` that references the `GatewayConfiguration` above.
@@ -314,7 +325,7 @@ You can use Kong enterprise as the dataplane by doing as follows:
     ```console
     $ kubectl get deployment -l konghq.com/gateway-operator=dataplane -o jsonpath='{.items[0].spec.template.spec.containers[0].image}'
 
-    kong/kong-gateway:2.8
+    kong/kong-gateway:3.3
     ```
 
 7. A log message should describe the status of the provided license. Check it through:
