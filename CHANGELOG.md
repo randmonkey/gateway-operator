@@ -17,6 +17,9 @@
 
 - Added `Ready`, `ReadyReplicas` and `Replicas` fields to `DataPlane`'s Status
   [#854](https://github.com/Kong/gateway-operator/pull/854)
+- Added `Rollout` field to `DataPlane` CRD. This allows specification of rollout strategy
+  and behavior (e.g. to enable blue/green rollouts for upgrades).
+  [#879](https://github.com/Kong/gateway-operator/pull/879)
 
 ### Changes
 
