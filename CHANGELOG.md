@@ -33,6 +33,13 @@
 - Bump Gateway API to v0.6.2 and enable Gateway API conformance testing.
   [#853](https://github.com/Kong/gateway-operator/pull/853)
 
+### Fixes
+
+- Fixes setting `Affinity` when generating `Deployment`s for `DataPlane`s
+  `ControlPlane`s which caused 2 `ReplicaSet`s to be created where the first
+  one should already have the `Affinity` set making the update unnecessary.
+  [#894](https://github.com/Kong/gateway-operator/pull/894)
+
 ## v0.5.0
 
 > Release date: 2023-06-20
