@@ -39,6 +39,10 @@
   More info on strategic merge patch can be found in official Kubernetes docs at
   [sig-api-machinery/strategic-merge-patch.md][strategic-merge-patch].
   [#862](https://github.com/Kong/gateway-operator/pull/862)
+- Added `v1beta1` version of the `DataPlane` API, which replaces the `v1alpha1`
+  version. The `v1alpha1` version of the API has been removed entirely in favor
+  of the new version to reduce maintenance costs.
+  [#905](https://github.com/Kong/gateway-operator/pull/905)
 
 [strategic-merge-patch]: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
 
