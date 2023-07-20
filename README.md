@@ -176,7 +176,7 @@ spec:
     deployment:
       pods:
         containerImage: kong/kubernetes-ingress-controller
-        version: "2.10.3"
+        version: "2.10.2"
         env:
         - name: TEST_VAR
           value: TEST_VAL
@@ -246,7 +246,7 @@ upgrade could be performed by running the following:
 kubectl edit gatewayconfiguration kong
 ```
 
-And updating the `dataPlaneDeploymentOptions.version` to `2.10.3`. The result
+And updating the `dataPlaneDeploymentOptions.version` to `2.10.0`. The result
 will be a replacement `Pod` will roll out with the new version and once healthy
 the old `Pod` will be terminated.
 
