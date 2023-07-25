@@ -21,6 +21,8 @@
 - Added `Rollout` field to `DataPlane` CRD. This allows specification of rollout strategy
   and behavior (e.g. to enable blue/green rollouts for upgrades).
   [#879](https://github.com/Kong/gateway-operator/pull/879)
+- Added `Rollout` status fields to `DataPlane` CRD.
+  [#896](https://github.com/Kong/gateway-operator/pull/896)
 
 ### Changes
 
