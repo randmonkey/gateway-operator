@@ -10,6 +10,14 @@
 - [v0.1.1](#v011)
 - [v0.1.0](#v010)
 
+## TBD
+
+### Changes
+
+- Default the leader election namespace to controller namespace (`POD_NAMESPACE` env)
+  instead of hardcoded "kong-system"
+  [#927](https://github.com/Kong/gateway-operator/pull/927)
+
 ## v0.6.0
 
 > Release date: 2023-07-20
