@@ -12,6 +12,12 @@
 
 ## TBD
 
+### Added
+
+- Added `gateway-operator.konghq.com/service-selector-override` as the dataplane
+  annotation to override the default `Selector` of both the admin and proxy services.
+  [#921](https://github.com/Kong/gateway-operator/pull/921)
+
 ### Changes
 
 - Default the leader election namespace to controller namespace (`POD_NAMESPACE` env)
@@ -26,8 +32,8 @@
 
 - Added `Ready`, `ReadyReplicas` and `Replicas` fields to `DataPlane`'s Status
   [#854](https://github.com/Kong/gateway-operator/pull/854)
-- Added `Rollout` field to `DataPlane` CRD. This allows specification of rollout strategy
-  and behavior (e.g. to enable blue/green rollouts for upgrades).
+- Added `Rollout` field to `DataPlane` CRD. This allows specification of rollout
+  strategy and behavior (e.g. to enable blue/green rollouts for upgrades).
   [#879](https://github.com/Kong/gateway-operator/pull/879)
 - Added `Rollout` status fields to `DataPlane` CRD.
   [#896](https://github.com/Kong/gateway-operator/pull/896)
