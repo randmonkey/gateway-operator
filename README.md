@@ -176,7 +176,7 @@ spec:
     deployment:
       pods:
         containerImage: kong/kubernetes-ingress-controller
-        version: "2.10.2"
+        version: "2.10.4"
         env:
         - name: TEST_VAR
           value: TEST_VAL
